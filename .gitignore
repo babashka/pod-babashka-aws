@@ -1,0 +1,7 @@
+.cpcache
+target
+pom.xml
+.lein-failures
+classes
+/pod-babashka-aws
+/pod-babashka-aws.jar

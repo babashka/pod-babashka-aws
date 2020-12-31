@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+if [ -z "$GRAALVM_HOME" ]; then
+    echo "Please set $GRAALVM_HOME"
+    exit 1
+fi
+
+clojure -X:native:uberjar
+
+"$GRAALVM_HOME/bin/gu" install native-image
+
+"$GRAALVM_HOME/bin/native-image" \
+    -cp "pod-babashka-aws.jar" \
+    -H:Name=pod-babashka-aws \
+    -H:+ReportExceptionStackTraces \
+    --initialize-at-build-time  \
+    -H:EnableURLProtocols=http,https,jar \
+    "--enable-all-security-services" \
+    --report-unsupported-elements-at-runtime \
+    "-H:ReflectionConfigurationFiles=reflection.json" \
+    --verbose \
+    --no-fallback \
+    --no-server \
+    "-J-Xmx3g" \
+    pod.babashka.aws
