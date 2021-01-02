@@ -93,10 +93,15 @@
                                 args (read-string args)
                                 args (read-transit args)]
                             (if-let [f (lookup var)]
-                              (let [value (write-transit (apply f args))
-                                    reply {"value" value
-                                           "id" id
-                                           "status" ["done"]}]
+                              (let [out-str (java.io.StringWriter.)
+                                    value (binding [*out* out-str]
+                                            (write-transit (apply f args)))
+                                    out-str (str out-str)
+                                    reply (cond-> {"value" value
+                                                   "id" id
+                                                   "status" ["done"]}
+                                            (not (clojure.string/blank? out-str))
+                                            (assoc "out" out-str))]
                                 (write stdout reply))
                               (throw (ex-info (str "Var not found: " var) {}))))
                           (catch Throwable e

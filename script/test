@@ -11,6 +11,8 @@
 
 (println (:ListBuckets (aws/ops s3)))
 
+(aws/doc s3 :ListBuckets)
+
 (if (and (System/getenv "AWS_ACCESS_KEY_ID") (System/getenv "AWS_SECRET_ACCESS_KEY"))
   (println (aws/invoke s3 {:op :ListBuckets}))
   (println "No credentials"))
