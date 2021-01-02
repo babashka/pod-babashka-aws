@@ -3,14 +3,9 @@
   (:require [bencode.core :as bencode]
             [clojure.java.io :as io]
             [clojure.spec.alpha]
-            [clojure.walk :as walk]
-            [cognitect.aws.client.api :as aws]
-            [cognitect.aws.http.cognitect]
-            [cognitect.aws.protocols.common]
-            [cognitect.aws.protocols.json]
-            [cognitect.aws.protocols.rest]
-            [cognitect.aws.protocols.rest-xml]
-            [cognitect.transit :as transit])
+            [clojure.walk :as walk]            
+            [cognitect.transit :as transit]
+            [pod.babashka.aws.impl.aws :as aws])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -41,8 +36,10 @@
 
 (def lookup*
   {'pod.babashka.aws
-   {'aws aws/invoke
-    'client aws/client
+   {'client aws/client
+    'doc aws/doc
+    'invoke aws/invoke
+    'ops aws/ops
     }})
 
 (defn lookup [var]
