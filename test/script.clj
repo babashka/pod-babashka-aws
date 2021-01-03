@@ -8,8 +8,12 @@
    [clojure.test :as t :refer [deftest is testing]]))
 
 (if (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
-  (pods/load-pod "./pod-babashka-aws")
-  (pods/load-pod ["clojure" "-M" "-m" "pod.babashka.aws"]))
+  (do
+    (println "Running native tests")
+    (pods/load-pod "./pod-babashka-aws"))
+  (do
+    (println "Running JVM tests")
+    (pods/load-pod ["clojure" "-M" "-m" "pod.babashka.aws"])))
 
 (require '[pod.babashka.aws :as aws])
 
