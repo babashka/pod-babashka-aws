@@ -3,7 +3,8 @@
   (:require [bencode.core :as bencode]
             [clojure.java.io :as io]
             [clojure.spec.alpha]
-            [clojure.walk :as walk]            
+            [clojure.string :as str]
+            [clojure.walk :as walk]
             [cognitect.transit :as transit]
             [pod.babashka.aws.impl.aws :as aws])
   (:import [java.io PushbackInputStream])
@@ -100,7 +101,7 @@
                                     reply (cond-> {"value" value
                                                    "id" id
                                                    "status" ["done"]}
-                                            (not (clojure.string/blank? out-str))
+                                            (not (str/blank? out-str))
                                             (assoc "out" out-str))]
                                 (write stdout reply))
                               (throw (ex-info (str "Var not found: " var) {}))))

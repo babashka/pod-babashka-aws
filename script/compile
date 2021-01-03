@@ -20,6 +20,7 @@ clojure -X:native:uberjar
     "--enable-all-security-services" \
     --report-unsupported-elements-at-runtime \
     "-H:ReflectionConfigurationFiles=reflection.json" \
+    "-H:ResourceConfigurationFiles=resources.json" \
     --verbose \
     --no-fallback \
     --no-server \

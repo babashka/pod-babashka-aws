@@ -1,8 +1,9 @@
 {
   "resources": [
-    {"pattern": "libsunec.so$"},
-    {"pattern": "libsunec.dylib$"},
-    {"pattern": "sunec.dll$"},
-    {"pattern": "sunec.lib$"}
+    {"pattern":"\\Qcognitect_aws_http.edn\\E"},
+    {"pattern":"cognitect/aws/.*/.*edn"},
+    {"pattern":"cognitect/aws/endpoints.edn"}
   ]
 }
+
+

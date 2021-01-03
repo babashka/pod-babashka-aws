@@ -22,9 +22,9 @@ Run `script/compile`. This requires `GRAALVM_HOME` to be set.
 
 ## Test
 
-To test the pod code with JVM clojure, run `clojure -M test.clj`.
+To test the pod code with JVM clojure, run `clojure -M test/script.clj`.
 
-To test the native image with bb, run `bb test.clj`.
+To test the native image with bb, run `bb test/script.clj`.
 
 ## License
 

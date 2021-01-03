@@ -5,13 +5,13 @@
    [cognitect.aws.client.api :as aws]
    ;; these are dynamically loaded at runtime
    [cognitect.aws.http.cognitect]
+   [cognitect.aws.protocols.common]
    [cognitect.aws.protocols.ec2]
    [cognitect.aws.protocols.json]
-   [cognitect.aws.protocols.common]
+   [cognitect.aws.protocols.query]
    [cognitect.aws.protocols.rest]
    [cognitect.aws.protocols.rest-json]
-   [cognitect.aws.protocols.rest-xml]
-   [cognitect.aws.protocols.query]))
+   [cognitect.aws.protocols.rest-xml]))
 
 (def http-client (delay (cognitect.aws.http.cognitect/create)))
 
