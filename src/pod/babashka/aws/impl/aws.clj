@@ -40,8 +40,9 @@
 (defn ops [client]
   (aws/ops (get-client client)))
 
-(defn doc [client op]
-  (aws/doc (get-client client) op))
+(defn -doc-str [client op]
+  (with-out-str
+    (aws/doc (get-client client) op)))
 
 (defn invoke [client op]
   (aws/invoke (get-client client) op))

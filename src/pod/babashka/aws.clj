@@ -38,7 +38,7 @@
 (def lookup*
   {'pod.babashka.aws
    {'client aws/client
-    'doc aws/doc
+    '-doc-str aws/-doc-str
     'invoke aws/invoke
     'ops aws/ops
     }})
@@ -55,9 +55,12 @@
          v))
    `{:format :transit+json
      :namespaces [{:name pod.babashka.aws
-                   :vars ~(mapv (fn [[k _]]
-                                  {:name k})
-                                (get lookup* 'pod.babashka.aws))}
+                   :vars ~(conj (mapv (fn [[k _]]
+                                        {:name k})
+                                      (get lookup* 'pod.babashka.aws))
+                                {:name "doc"
+                                 :code "(defn doc [client op]
+                                          (println (-doc-str client op)))"})}
                   ]}))
 
 (defn read-transit [^String v]

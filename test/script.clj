@@ -1,9 +1,11 @@
 #!/usr/bin/env bb
 
 (ns script
-  (:require [babashka.pods :as pods]
-            [clojure.edn :as edn]
-            [clojure.test :as t :refer [deftest is testing]]))
+  (:require
+   [babashka.pods :as pods]
+   [clojure.edn :as edn]
+   [clojure.string :as str]
+   [clojure.test :as t :refer [deftest is testing]]))
 
 (if (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (pods/load-pod "./pod-babashka-aws")
@@ -17,8 +19,9 @@
   (is (contains? (aws/ops s3) :ListBuckets)))
 
 (deftest aws-doc
-  ;; FIXME capture *out* in babashka, currently prints directly to System/out
-  (is (= (with-out-str (aws/doc s3 :ListBuckets)) "TODO")))
+  (is (str/includes?
+       (with-out-str (aws/doc s3 :ListBuckets))
+       "Returns a list of all buckets")))
 
 (if (and (System/getenv "AWS_ACCESS_KEY_ID") (System/getenv "AWS_SECRET_ACCESS_KEY"))
   (deftest aws-invoke
