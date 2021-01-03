@@ -30,4 +30,4 @@ To test the native image with bb, run `bb test/script.clj`.
 
 Copyright © 2020 Michiel Borkent
 
-Distributed under the EPL 1.0. See LICENSE.
+Distributed under the Apache License 2.0. See LICENSE.
