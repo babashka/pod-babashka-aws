@@ -99,7 +99,8 @@
                             (if-let [f (lookup var)]
                               (let [out-str (java.io.StringWriter.)
                                     value (binding [*out* out-str]
-                                            (write-transit (apply f args)))
+                                            (let [v (apply f args)]
+                                              (write-transit v)))
                                     out-str (str out-str)
                                     reply (cond-> {"value" value
                                                    "id" id
