@@ -71,7 +71,11 @@
 
 (defn write-transit [v]
   (let [baos (java.io.ByteArrayOutputStream.)]
-    (transit/write (transit/writer baos :json) v)
+    (try (transit/write (transit/writer baos :json) v)
+         (catch Exception e
+           (binding [*out* *err*]
+             (prn "ERROR: can't serialize to transit:" v))
+           (throw e)))
     (.toString baos "utf-8")))
 
 (defn -main [& _args]
