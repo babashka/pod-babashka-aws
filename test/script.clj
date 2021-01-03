@@ -23,30 +23,31 @@
 
 (def s3 (aws/client {:api :s3}))
 
-(deftest aws-ops
+(deftest aws-ops-test
   (is (contains? (aws/ops s3) :ListBuckets)))
 
-(deftest aws-doc
+(deftest aws-doc-test
   (is (str/includes?
        (with-out-str (aws/doc s3 :ListBuckets))
        "Returns a list of all buckets")))
 
 (if (and (System/getenv "AWS_ACCESS_KEY_ID") (System/getenv "AWS_SECRET_ACCESS_KEY"))
-  (deftest aws-invoke
+  (deftest aws-invoke-test
     (is (= (keys (aws/invoke s3 {:op :ListBuckets})) [:Buckets :Owner])))
   (println "Skipping credential test"))
 
-(deftest no-such-service
+(deftest no-such-service-test
   (is (thrown-with-msg?
        Exception #"api :some-typo not available"
        (aws/client {:api :some-typo}))))
 
 (def services (edn/read-string (slurp "resources/aws-services.edn")))
 
-(testing "all clients of all available services"
-  (doseq [service services]
-    (is (= service (do (aws/client {:api service})
-                       service)))))
+(deftest all-services-test
+  (testing "all clients of all available services"
+    (doseq [service services]
+      (is (= service (do (aws/client {:api service})
+                         service))))))
 
 (when-not (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (shutdown-agents))
