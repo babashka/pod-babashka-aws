@@ -7,6 +7,10 @@
    [clojure.string :as str]
    [clojure.test :as t :refer [deftest is testing]]))
 
+(defmethod clojure.test/report :begin-test-var [m]
+  (println "===" (-> m :var meta :name))
+  (println))
+
 (if (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (do
     (println "Running native tests")
