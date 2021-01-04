@@ -10,8 +10,8 @@
            :native {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
                     :extra-deps {org.clojure/clojure {:mvn/version "1.10.2-rc1"}}}}
  :deps {com.cognitect/transit-clj {:mvn/version "1.0.324"}
-        com.cognitect.aws/api     {:git/url "https://github.com/cognitect-labs/aws-api"
-                                   :sha "515daf9273edeb16df8ee158cfb90cef5c3d30c2"}
+        com.cognitect.aws/api     {:git/url "https://github.com/babashka/aws-api"
+                                   :sha "e5b7e6131ecabd2d5ea4e1d126c7a77090ffd1e3"}
         com.cognitect.aws/endpoints {:mvn/version "1.1.11.926"}
 
         nrepl/bencode {:mvn/version "1.1.0"}
