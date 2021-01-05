@@ -3,7 +3,7 @@
 rm -rf /tmp/release
 mkdir -p /tmp/release
 cp pod-babashka-aws /tmp/release
-VERSION=$(cat resources/POD_BABASHKA_AWS)
+VERSION=$(cat resources/POD_BABASHKA_AWS_VERSION)
 
 cd /tmp/release
 
