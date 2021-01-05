@@ -6,7 +6,8 @@
             [clojure.string :as str]
             [clojure.walk :as walk]
             [cognitect.transit :as transit]
-            [pod.babashka.aws.impl.aws :as aws])
+            [pod.babashka.aws.impl.aws :as aws]
+            [pod.babashka.aws.impl.aws.credentials :as credentials])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -36,7 +37,8 @@
   (bencode/read-bencode stream))
 
 (def lookup*
-  {'pod.babashka.aws
+  {'pod.babashka.aws.credentials credentials/lookup-map
+   'pod.babashka.aws
    {'client aws/client
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
@@ -58,6 +60,7 @@
                    :vars ~(conj (mapv (fn [[k _]]
                                         {:name k})
                                       (get lookup* 'pod.babashka.aws))
+                                        ;{:name "client"}
                                 {:name "doc"
                                  :code "(defn doc [client op]
                                           (println (-doc-str client op)))"}
@@ -76,7 +79,8 @@
                                                                        (case t
                                                                          :bytes (clojure.java.io/input-stream y))
                                                                        x))
-                                                                   response)))"})}]}))
+                                                                   response)))"})}
+                  ~credentials/describe-map]}))
 
 
 (defn read-transit [^String v]
