@@ -1,7 +1,7 @@
 (ns pod.babashka.aws.impl.aws
   (:require
    [clojure.edn]
-   [clojure.java.io]
+   [clojure.java.io :as io]
    [cognitect.aws.client.api :as aws]
    ;; these are dynamically loaded at runtime
    [cognitect.aws.http.cognitect]
@@ -20,7 +20,7 @@
 #_(defn get-credential-provider [config]
   (get @*credential-providers (get config ::credential-provider-id)))
 
-(def services (into (sorted-set) (clojure.edn/read-string (slurp (clojure.java.io/resource "aws-services.edn")))))
+(def services (into (sorted-set) (clojure.edn/read-string (slurp (io/resource "aws-services.edn")))))
 
 (def *clients (atom {}))
 
@@ -44,5 +44,21 @@
   (with-out-str
     (aws/doc (get-client client) op)))
 
-(defn invoke [client op]
-  (aws/invoke (get-client client) op))
+(defn ^bytes input-stream->byte-array [^java.io.InputStream is]
+  (let [os (java.io.ByteArrayOutputStream.)]
+    (io/copy is os)
+    (.toByteArray os)))
+
+(defprotocol IWrapObject
+  (wrap-object [x]))
+
+(extend-protocol IWrapObject
+  Object
+  (wrap-object [x] x)
+
+  java.io.InputStream
+  (wrap-object [x]
+    {:pod.babashka.aws/wrapped [:bytes (input-stream->byte-array x)]}))
+
+(defn -invoke [client op]
+  (clojure.walk/postwalk wrap-object (aws/invoke (get-client client) op)))
