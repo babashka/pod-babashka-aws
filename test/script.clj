@@ -4,6 +4,7 @@
   (:require
    [babashka.pods :as pods]
    [clojure.edn :as edn]
+   [clojure.java.io :as io]
    [clojure.string :as str]
    [clojure.test :as t :refer [deftest is testing]]))
 
@@ -21,7 +22,9 @@
 
 (require '[pod.babashka.aws :as aws])
 
-(def s3 (aws/client {:api :s3}))
+(def region (System/getenv "AWS_REGION"))
+(def s3 (aws/client {:api :s3 :region
+                     (or region "eu-central-1")}))
 
 (deftest aws-ops-test
   (is (contains? (aws/ops s3) :ListBuckets)))
@@ -31,10 +34,49 @@
        (with-out-str (aws/doc s3 :ListBuckets))
        "Returns a list of all buckets")))
 
-(if (and (System/getenv "AWS_ACCESS_KEY_ID") (System/getenv "AWS_SECRET_ACCESS_KEY"))
-  (deftest aws-invoke-test
-    (is (= (keys (aws/invoke s3 {:op :ListBuckets})) [:Buckets :Owner])))
-  (println "Skipping credential test"))
+(deftest aws-invoke-test
+  ;; tests cannot be conditionally defined in bb currently, see #705, so moved
+  ;; the conditions inside the test
+  (if (and (System/getenv "AWS_ACCESS_KEY_ID")
+           (System/getenv "AWS_SECRET_ACCESS_KEY")
+           region)
+    (do (is (= (keys (aws/invoke s3 {:op :ListBuckets})) [:Buckets :Owner]))
+        (let [png (java.nio.file.Files/readAllBytes
+                   (.toPath (io/file "resources" "babashka.png")))
+              ;; ensure bucket, ignore error if it already exists
+              _bucket-resp (aws/invoke
+                            s3
+                            {:op :CreateBucket
+                             :request {:Bucket "pod-babashka-aws"
+                                       :CreateBucketConfiguration {:LocationConstraint region}}})
+              put1 (aws/invoke s3 {:op :PutObject
+                                   :request {:Bucket "pod-babashka-aws"
+                                             :Key "logo.png"
+                                             :Body png}})
+              _ (is (not (:Error put1)))
+              get1 (aws/invoke s3 {:op :GetObject
+                                   :request {:Bucket "pod-babashka-aws"
+                                             :Key "logo.png"}})
+              read-bytes (fn [is]
+                           (let [baos (java.io.ByteArrayOutputStream.)]
+                             (io/copy is baos)
+                             (.toByteArray baos)))
+              bytes (read-bytes (:Body get1))
+              _ (is (= (count png) (count bytes)))
+              put2 (testing "inputstream arg"
+                     (aws/invoke s3 {:op :PutObject
+                                     :request {:Bucket "pod-babashka-aws"
+                                               :Key "logo.png"
+                                               :Body (io/input-stream
+                                                      (io/file "resources" "babashka.png"))}}))
+              _ (is (not (:Error put2)))
+              get2 (aws/invoke s3 {:op :GetObject
+                                   :request {:Bucket "pod-babashka-aws"
+                                             :Key "logo.png"}})
+              bytes (read-bytes (:Body get2))
+              _ (is (= (count png) (count bytes)))]
+          :the-end))
+    (println "Skipping credential test")))
 
 (deftest no-such-service-test
   (is (thrown-with-msg?
