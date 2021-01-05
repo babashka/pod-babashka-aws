@@ -39,7 +39,7 @@
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
    'pod.babashka.aws
-   {'client aws/client
+   {'-client aws/-client
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
     'ops aws/ops
@@ -61,6 +61,11 @@
                                         {:name k})
                                       (get lookup* 'pod.babashka.aws))
                                         ;{:name "client"}
+                                {:name "client"
+                                 :code (pr-str '(defn client [{:keys [credentials-provider] :as config}]
+                                                  (let [;credentials-provider (or credentials-provider (pod.babashka.aws.credentials/default-credentials-provider nil))
+                                                        ]
+                                                    (-client (assoc config :credentials-provider credentials-provider)))))}
                                 {:name "doc"
                                  :code "(defn doc [client op]
                                           (println (-doc-str client op)))"}
