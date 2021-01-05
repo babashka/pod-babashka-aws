@@ -79,13 +79,14 @@ jobs:
             script/compile
           no_output_timeout: 30m
       - run:
-          name: Run tests
+          name: Install bb for test
           command: |
-            script/test
-      # - run:
-      #     name: Performance report
-      #     command: |
-      #       .circleci/script/performance
+            mkdir bb
+            bash <(curl -sL https://raw.githubusercontent.com/borkdude/babashka/master/install) \
+              --dir bb --download-dir bb
+      - run:
+          name: Run test
+          command: PATH=$PATH:bb script/test
       - run:
           name: Release
           command: |
@@ -119,11 +120,6 @@ jobs:
           command: |
             .circleci/script/install-clojure /usr/local
       - run:
-          name: Install Leiningen
-          command: |
-            .circleci/script/install-leiningen
-
-      - run:
           name: Download GraalVM
           command: |
             cd ~
@@ -138,13 +134,14 @@ jobs:
             script/compile
           no_output_timeout: 30m
       - run:
-          name: Run tests
+          name: Install bb for test
           command: |
-            script/test
-      # - run:
-      #     name: Performance report
-      #     command: |
-      #       .circleci/script/performance
+            mkdir bb
+            bash <(curl -sL https://raw.githubusercontent.com/borkdude/babashka/master/install) \
+              --dir bb --download-dir bb
+      - run:
+          name: Run test
+          command: PATH=$PATH:bb script/test
       - run:
           name: Release
           command: |
@@ -179,16 +176,6 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "deps.edn" }}
-  # docker:
-  #   docker:
-  #     - image: circleci/buildpack-deps:stretch
-  #   steps:
-  #     - checkout
-  #     - setup_remote_docker:
-  #         docker_layer_caching: true
-  #     - run:
-  #         name: Build Docker image
-  #         command: .circleci/script/docker
 
 workflows:
   version: 2
@@ -205,11 +192,3 @@ workflows:
             - jvm
             - linux
             - mac
-      # - docker:
-      #     filters:
-      #       branches:
-      #         only: master
-      #     requires:
-      #       - jvm
-      #       - linux
-      #       - mac

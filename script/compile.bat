@@ -8,7 +8,7 @@ if "%GRAALVM_HOME%"=="" (
 set JAVA_HOME=%GRAALVM_HOME%
 set PATH=%GRAALVM_HOME%\bin;%PATH%
 
-set /P VERSION=< resources\POD_BABASHKA_BUDDY_VERSION
+set /P VERSION=< resources\POD_BABASHKA_AWS_VERSION
 echo Building version %VERSION%
 
 if "%GRAALVM_HOME%"=="" (
@@ -21,19 +21,23 @@ bb --clojure -X:native:uberjar
 call %GRAALVM_HOME%\bin\gu.cmd install native-image
 
 call %GRAALVM_HOME%\bin\native-image.cmd ^
-  "-cp" "pod-babashka-buddy.jar" ^
-  "-H:Name=pod-babashka-buddy" ^
+  "-cp" "pod-babashka-aws.jar" ^
+  "-H:Name=pod-babashka-aws" ^
   "-H:+ReportExceptionStackTraces" ^
   "--initialize-at-build-time" ^
   "-H:EnableURLProtocols=jar" ^
   "--report-unsupported-elements-at-runtime" ^
+  "-H:EnableURLProtocols=http,https,jar" ^
+  "--enable-all-security-services" ^
+  "-H:ReflectionConfigurationFiles=reflection.json" ^
+  "-H:ResourceConfigurationFiles=resources.json" ^
   "--verbose" ^
   "--no-fallback" ^
   "--no-server" ^
   "-J-Xmx3g" ^
-  "pod.babashka.buddy"
+  "pod.babashka.aws"
 
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Creating zip archive
-jar -cMf pod-babashka-buddy-%VERSION%-windows-amd64.zip pod-babashka-buddy.exe
+jar -cMf pod-babashka-aws-%VERSION%-windows-amd64.zip pod-babashka-aws.exe

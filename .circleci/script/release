@@ -2,15 +2,15 @@
 
 rm -rf /tmp/release
 mkdir -p /tmp/release
-cp pod-babashka-buddy /tmp/release
-VERSION=$(cat resources/POD_BABASHKA_BUDDY_VERSION)
+cp pod-babashka-aws /tmp/release
+VERSION=$(cat resources/POD_BABASHKA_AWS)
 
 cd /tmp/release
 
 ## release binary as zip archive
 
-zip "pod-babashka-buddy-$VERSION-$APP_PLATFORM-amd64.zip" pod-babashka-buddy
+zip "pod-babashka-aws-$VERSION-$APP_PLATFORM-amd64.zip" pod-babashka-aws
 
 ## cleanup
 
-rm pod-babashka-buddy
+rm pod-babashka-aws

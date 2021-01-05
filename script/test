@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [[ "$APP_TEST_ENV" == "native" ]]
+then
+  bb test/script.clj
+else
+  clojure -M test/script.clj
+fi
