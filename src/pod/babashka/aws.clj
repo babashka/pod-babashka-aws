@@ -63,12 +63,20 @@
                                           (println (-doc-str client op)))"}
                                 {:name "invoke"
                                  :code "(defn invoke [client op]
-                                          (clojure.walk/postwalk (fn [x]
-                                                                   (if-let [[t y] (:pod.babashka.aws/wrapped x)]
-                                                                     (case t
-                                                                       :bytes (clojure.java.io/input-stream y))
-                                                                     x))
-                                                                 (-invoke client op)))"})}]}))
+                                          (let [op (clojure.walk/postwalk (fn [x]
+                                                                            (if (instance? java.io.InputStream x)
+                                                                              (let [os (java.io.ByteArrayOutputStream.)]
+                                                                                (clojure.java.io/copy x os)
+                                                                                (.toByteArray os))
+                                                                              x))
+                                                                          op)
+                                                response (-invoke client op)]
+                                            (clojure.walk/postwalk (fn [x]
+                                                                     (if-let [[t y] (:pod.babashka.aws/wrapped x)]
+                                                                       (case t
+                                                                         :bytes (clojure.java.io/input-stream y))
+                                                                       x))
+                                                                   response)))"})}]}))
 
 
 (defn read-transit [^String v]
