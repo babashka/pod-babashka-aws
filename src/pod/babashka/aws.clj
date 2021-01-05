@@ -39,7 +39,7 @@
   {'pod.babashka.aws
    {'client aws/client
     '-doc-str aws/-doc-str
-    'invoke aws/invoke
+    '-invoke aws/-invoke
     'ops aws/ops
     }})
 
@@ -60,8 +60,16 @@
                                       (get lookup* 'pod.babashka.aws))
                                 {:name "doc"
                                  :code "(defn doc [client op]
-                                          (println (-doc-str client op)))"})}
-                  ]}))
+                                          (println (-doc-str client op)))"}
+                                {:name "invoke"
+                                 :code "(defn invoke [client op]
+                                          (clojure.walk/postwalk (fn [x]
+                                                                   (if-let [[t y] (:pod.babashka.aws/wrapped x)]
+                                                                     (case t
+                                                                       :bytes (clojure.java.io/input-stream y))
+                                                                     x))
+                                                                 (-invoke client op)))"})}]}))
+
 
 (defn read-transit [^String v]
   (transit/read
