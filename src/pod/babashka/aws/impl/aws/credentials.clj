@@ -2,6 +2,7 @@
   (:require
    [clojure.edn]
    [clojure.java.io :as io]
+   [clojure.set]
    [cognitect.aws.client.api :as aws]
    [cognitect.aws.credentials :as creds]
    [pod.babashka.aws.impl.aws]))
