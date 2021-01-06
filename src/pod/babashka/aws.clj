@@ -56,20 +56,21 @@
      (if (ident? v) (name v)
          v))
    `{:format :transit+json
-     :namespaces [{:name pod.babashka.aws
+     :namespaces [~credentials/describe-map
+                  {:name pod.babashka.aws
                    :vars ~(conj (mapv (fn [[k _]]
                                         {:name k})
                                       (get lookup* 'pod.babashka.aws))
 
                                 {:name "client"
                                  :code
-                                 (pr-str '
-                                  (do
-                                    (require '[pod.babashka.aws.credentials :as credentials])
-                                    (defn client [{:keys [credentials-provider] :as config}]
-                                      (let [credentials-provider (or credentials-provider
-                                                                     (credentials/default-credentials-provider))]
-                                        (-client (assoc config :credentials-provider (credentials/map->Provider credentials-provider)))))))}
+                                 (pr-str
+                                  '(do
+                                     (require '[pod.babashka.aws.credentials :as credentials])
+                                     (defn client [{:keys [credentials-provider] :as config}]
+                                       (let [credentials-provider (or credentials-provider
+                                                                      (credentials/default-credentials-provider))]
+                                         (-client (assoc config :credentials-provider (credentials/map->Provider credentials-provider)))))))}
                                 {:name "doc"
                                  :code "(defn doc [client op]
                                           (println (-doc-str client op)))"}
@@ -88,8 +89,7 @@
                                                                        (case t
                                                                          :bytes (clojure.java.io/input-stream y))
                                                                        x))
-                                                                   response)))"})}
-                  ~credentials/describe-map]}))
+                                                                   response)))"})}]}))
 
 
 (defn read-transit [^String v]
