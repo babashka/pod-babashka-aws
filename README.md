@@ -20,12 +20,28 @@ Available namespaces and functions:
 
 (require '[pod.babashka.aws :as aws])
 
+(def region "eu-central-1")
+
 (def s3-client
-  (aws/client {:api :s3 :region "eu-central-1"}))
+  (aws/client {:api :s3 :region region}))
 
 (aws/doc s3-client :ListBuckets)
 
 (aws/invoke s3-client {:op :ListBuckets})
+
+(aws/invoke s3-client
+            {:op :CreateBucket
+             :request {:Bucket "pod-babashka-aws"
+                       :CreateBucketConfiguration {:LocationConstraint region}}})
+
+(require '[clojure.java.io :as io])
+
+(aws/invoke s3-client
+            {:op :PutObject
+             :request {:Bucket "pod-babashka-aws"
+                       :Key "logo.png"
+                       :Body (io/input-stream
+                              (io/file "resources" "babashka.png"))}})
 ```
 
 See [test/script.clj](test/script.clj) for an example script.
