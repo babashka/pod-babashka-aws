@@ -2,6 +2,10 @@
 
 A babashka pod wrapping the [aws-cli](https://github.com/cognitect-labs/aws-api) library.
 
+## Status
+
+Experimental, awaiting your feedback.
+
 ## API
 
 The namespaces and functions in this pod reflect those in the official
