@@ -1,6 +1,8 @@
 # pod-babashka-aws
 
-A babashka pod wrapping the [aws-cli](https://github.com/cognitect-labs/aws-api) library.
+A [babashka](https://github.com/babashka/babashka)
+[pod](https://github.com/babashka/pods) wrapping the
+[aws-cli](https://github.com/cognitect-labs/aws-api) library.
 
 ## Status
 
