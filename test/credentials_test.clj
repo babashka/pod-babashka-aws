@@ -42,21 +42,21 @@
     temp-dir))
 
 (deftest aws-credentials-test
-  (is (= (creds/-fetch (creds/basic-credentials-provider {:access-key-id "key"
+  (is (= (creds/fetch (creds/basic-credentials-provider {:access-key-id "key"
                                                           :secret-access-key "secret"}))
          #:aws{:access-key-id "key", :secret-access-key "secret"}))
 
   (with-system-properties {"aws.accessKeyId" "prop-key"
                            "aws.secretKey" "prop-secret"}
-    (is (= (creds/-fetch (creds/system-property-credentials-provider))
+    (is (= (creds/fetch (creds/system-property-credentials-provider))
            #:aws{:access-key-id "prop-key", :secret-access-key "prop-secret"})))
 
   (with-system-properties {"aws.accessKeyId" "default-prop-key"
                            "aws.secretKey" "default-prop-secret"}
-    (is (= (creds/-fetch (creds/default-credentials-provider))
+    (is (= (creds/fetch (creds/default-credentials-provider))
            #:aws{:access-key-id "default-prop-key", :secret-access-key "default-prop-secret"})))
 
-  (is (= (creds/-fetch (creds/basic-credentials-provider {:access-key-id "basic-key"
+  (is (= (creds/fetch (creds/basic-credentials-provider {:access-key-id "basic-key"
                                                           :secret-access-key "basic-secret"}))
          #:aws{:access-key-id  "basic-key", :secret-access-key "basic-secret"}))
 
@@ -64,7 +64,7 @@
 aws_access_key_id=creds-prop-key
 aws_secret_access_key=creds-prop-secret")]
     (with-system-properties {"user.home" home-dir}
-      (is (= (creds/-fetch (creds/profile-credentials-provider))
+      (is (= (creds/fetch (creds/profile-credentials-provider))
              #:aws{:access-key-id "creds-prop-key", :secret-access-key "creds-prop-secret"
                    :session-token nil}))))
 
@@ -73,7 +73,7 @@ aws_access_key_id=creds-custom-prop-key
 aws_secret_access_key=creds-custom-prop-secret")]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
-      (is (= (creds/-fetch (creds/profile-credentials-provider))
+      (is (= (creds/fetch (creds/profile-credentials-provider))
              #:aws{:access-key-id "creds-custom-prop-key", :secret-access-key "creds-custom-prop-secret"
                    :session-token nil}))))
 
@@ -84,7 +84,7 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
         home-dir (create-aws-credentials-file creds-file-content)]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
-      (is (= (creds/-fetch (creds/profile-credentials-provider+))
+      (is (= (creds/fetch (creds/profile-credentials-provider+))
              #:aws{:access-key-id "creds+-custom-prop-key",
                    :secret-access-key "creds+-custom-prop-secret"
                    :session-token nil
@@ -100,7 +100,7 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
         home-dir (create-aws-credentials-file creds-file-content)]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
-      (is (= (creds/-fetch (creds/profile-credentials-provider+))
+      (is (= (creds/fetch (creds/profile-credentials-provider+))
              #:aws{:access-key-id "creds+-custom-prop-key",
                    :secret-access-key "creds+-custom-prop-secret"
                    :session-token session-token
