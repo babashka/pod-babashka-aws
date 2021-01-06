@@ -1,9 +1,14 @@
 (ns pod.babashka.aws.impl.aws.credentials
   (:require
+   [clojure.data.json :as json]
    [clojure.edn]
    [clojure.java.io :as io]
+   [clojure.java.shell :as shell]
+   [clojure.tools.logging :as log]
    [cognitect.aws.client.api :as aws]
+   [cognitect.aws.config :as config]
    [cognitect.aws.credentials :as creds]
+   [cognitect.aws.util :as u]
    [pod.babashka.aws.impl.aws]))
 
 ;;; Pod Backend
@@ -37,7 +42,6 @@
   (with-system-properties jvm-props
     (create-provider (creds/system-property-credentials-provider))))
 
-;; REVIEW do we want to support `credential_process
 (defn -profile-credentials-provider
   ([jvm-props]
    (with-system-properties jvm-props
@@ -49,6 +53,53 @@
 
   ([jvm-props profile-name ^java.io.File f]
    (throw (ex-info "profile-credentials-provider with 2 arguments not supported yet" {}))))
+
+(defn run-credential-process-cmd [cmd]
+  (let [{:keys [exit out err]} (shell/sh "bash" "-c" cmd)]
+    (if (zero? exit)
+      out
+      (throw (ex-info (str "Non-zero exit: " (pr-str err)) {})))))
+
+(defn get-credentials-via-cmd [cmd]
+  (let [credential-map (json/read-str (run-credential-process-cmd cmd))
+        {:strs [AccessKeyId SecretAccessKey SessionToken]} credential-map]
+    (assert (and AccessKeyId SecretAccessKey))
+    {"aws_access_key_id" AccessKeyId
+     "aws_secret_access_key" SecretAccessKey
+     "aws_session_token" SessionToken}))
+
+(defn -profile-credentials-provider+
+  "Like profile-credentials-provider but with support for credential_process
+
+   See https://github.com/cognitect-labs/aws-api/issues/73"
+  ([jvm-props]
+   (with-system-properties jvm-props
+     (-profile-credentials-provider+ jvm-props (or (u/getenv "AWS_PROFILE")
+                                                   (u/getProperty "aws.profile")
+                                                   "default"))))
+  ([jvm-props profile-name]
+   (with-system-properties jvm-props
+     (-profile-credentials-provider+ jvm-props profile-name (or (io/file (u/getenv "AWS_CREDENTIAL_PROFILES_FILE"))
+                                                                (io/file (u/getProperty "user.home") ".aws" "credentials")))))
+  ([_jvm-props profile-name ^java.io.File f]
+   (create-provider
+    (creds/auto-refreshing-credentials
+     (reify creds/CredentialsProvider
+       (fetch [_]
+         (when (.exists f)
+           (try
+             (let [profile (get (config/parse f) profile-name)
+                   profile (if-let [cmd (get profile "credential_process")]
+                             (merge profile (get-credentials-via-cmd cmd))
+                             profile)]
+               (creds/valid-credentials
+                {:aws/access-key-id     (get profile "aws_access_key_id")
+                 :aws/secret-access-key (get profile "aws_secret_access_key")
+                 :aws/session-token     (get profile "aws_session_token")}
+                "aws profiles file"))
+             (catch Throwable t
+               (log/error t "Error fetching credentials from aws profiles file")
+               {})))))))))
 
 (def http-client pod.babashka.aws.impl.aws/http-client)
 
@@ -72,6 +123,7 @@
    '-basic-credentials-provider -basic-credentials-provider
    '-system-property-credentials-provider -system-property-credentials-provider
    '-profile-credentials-provider -profile-credentials-provider
+   '-profile-credentials-provider+ -profile-credentials-provider+
    '-default-credentials-provider -default-credentials-provider})
 
 (def describe-map
@@ -94,6 +146,11 @@
             :code (pr-str
                    '(defn profile-credentials-provider [& args]
                       (map->Provider (apply -profile-credentials-provider (cons (System/getProperties) args)))))}
+
+           {:name "profile-credentials-provider+"
+            :code (pr-str
+                   '(defn profile-credentials-provider+ [& args]
+                      (map->Provider (apply -profile-credentials-provider+ (cons (System/getProperties) args)))))}
 
            {:name "basic-credentials-provider"
             :code (pr-str

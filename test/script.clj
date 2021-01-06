@@ -94,6 +94,16 @@ aws_secret_access_key=creds-custom-prop-secret")]
                              "aws.profile" "custom"}
       (is (= (creds/-fetch (creds/profile-credentials-provider))
              #:aws{:access-key-id "creds-custom-prop-key", :secret-access-key "creds-custom-prop-secret"
+                   :session-token nil}))))
+
+
+  (let [home-dir (create-aws-credentials-file "[custom]
+credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretAccessKey\":\"creds+-custom-prop-secret\",\"Version\":1}'")]
+    (with-system-properties {"user.home" home-dir
+                             "aws.profile" "custom"}
+      (is (= (creds/-fetch (creds/profile-credentials-provider+))
+             #:aws{:access-key-id "creds+-custom-prop-key",
+                   :secret-access-key "creds+-custom-prop-secret"
                    :session-token nil})))))
 
 
