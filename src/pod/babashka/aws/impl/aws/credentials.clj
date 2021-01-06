@@ -109,6 +109,11 @@
    (with-system-properties jvm-props
      (create-provider (creds/default-credentials-provider @http-client))))
 
+(extend-protocol creds/CredentialsProvider
+  clojure.lang.PersistentArrayMap
+  (fetch [m]
+    (creds/fetch (get-provider m))))
+
 ;;; Pod Client
 
 (defn -fetch [provider]
