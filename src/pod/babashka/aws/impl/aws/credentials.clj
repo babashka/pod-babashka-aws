@@ -4,7 +4,6 @@
    [clojure.java.io :as io]
    [cognitect.aws.client.api :as aws]
    [cognitect.aws.credentials :as creds]
-   [pod.babashka.aws.impl.aws.credentials]
    [pod.babashka.aws.impl.aws]))
 
 ;;; Pod Backend
@@ -14,10 +13,10 @@
 (defn create-provider [provider]
   (let [provider-id (java.util.UUID/randomUUID)]
     (swap! *providers assoc provider-id provider)
-    {::provider-id provider-id}))
+    {:provider-id provider-id}))
 
 (defn get-provider [config]
-  (get @*providers (get config ::provider-id)))
+  (get @*providers (get config :provider-id)))
 
 (defn -basic-credentials-provider [conf]
   (create-provider (creds/basic-credentials-provider conf)))
@@ -28,6 +27,7 @@
 (defn -environment-credentials-provider []
   (create-provider (creds/environment-credentials-provider)))
 
+;; REVIEW do we want to support `credential_process
 (defn -profile-credentials-provider
   ([]
    (create-provider (creds/profile-credentials-provider)))
@@ -40,12 +40,16 @@
 
 (def http-client pod.babashka.aws.impl.aws/http-client)
 
-(defn -container-credentials-provider [__http-client]
+(defn -container-credentials-provider [& _]
   (create-provider (creds/container-credentials-provider @http-client)))
 
-(defn -instance-profile-credentials-provider [__http-client]
+(defn -instance-profile-credentials-provider [& _]
   (create-provider (creds/instance-profile-credentials-provider @http-client)))
 
+(extend-protocol creds/CredentialsProvider
+  clojure.lang.PersistentArrayMap
+  (fetch [m]
+    (creds/fetch (get-provider m))))
 
 ;;; Pod Client
 
@@ -54,8 +58,7 @@
     (creds/fetch provider)))
 
 (def lookup-map
-  {'-http-client http-client
-   '-create-provider create-provider
+  {'-create-provider create-provider
    '-get-provider get-provider
    '-fetch -fetch
    '-basic-credentials-provider -basic-credentials-provider
@@ -65,6 +68,16 @@
    '-container-credentials-provider -container-credentials-provider
    '-instance-profile-credentials-provider -instance-profile-credentials-provider
    'valid-credentials creds/valid-credentials})
+
+
+(defn delegate-provider [provider-sym]
+  {:name (str provider-sym)
+   :code (pr-str
+          (clojure.walk/postwalk-replace
+           {::provider (symbol provider-sym)
+            ::private-provider (symbol (str "-" provider-sym))}
+           '(defn ::provider [& args]
+              (map->Provider (apply ::private-provider args)))))})
 
 (def describe-map
   `{:name pod.babashka.aws.credentials
@@ -76,54 +89,37 @@
             :code (pr-str
                    '(defprotocol CredentialsProvider
                       (fetch [_])))}
-
-           {:name "chain-credentials-provider"
+           {:name "map->Provider"
             :code (pr-str
-                   '(defn chain-credentials-provider [providers]
-                      (let [provider (-chain-credentials-provider providers)]
-                        (reify CredentialsProvider
-                          (fetch [_]
-                            (-fetch provider))))))}
+                   '(defrecord Provider [provider-id]
+                      CredentialsProvider
+                      (fetch [provider]
+                        (-fetch provider))))}
+           (delegate-provider "chain-credentials-provider")
+           (delegate-provider "environment-credentials-provider")
+           (delegate-provider "profile-credentials-provider")
+           (delegate-provider "container-credentials-provider")
+           (delegate-provider "instance-profile-credentials-provider")
+           (delegate-provider "basic-credentials-provider")
 
-           {:name "environment-credentials-provider"
-            :code (pr-str
-                   '(defn environment-credentials-provider []
-                      (let [provider (-environment-credentials-provider)]
-                        (reify CredentialsProvider
-                          (fetch [_]
-                            (-fetch provider))))))}
-
-            {:name "-system-property-credentials-provider"
-            :code (pr-str
-                   '(defn -system-property-credentials-provider []
-                      (-create-provider (when-let [creds (valid-credentials
-                                                        {:aws/access-key-id (System/getProperty "aws.accessKeyId")
-                                                         :aws/secret-access-key (System/getProperty "aws.secretKey")})]
-                                        (-basic-credentials-provider (clojure.set/rename-keys creds  {:aws/access-key-id :access-key-id
-                                                                                                      :aws/secret-access-key :secret-access-key}))))))}
            {:name "system-property-credentials-provider"
             :code (pr-str
                    '(defn system-property-credentials-provider []
-                      (let [provider (-system-property-credentials-provider)]
-                        (reify CredentialsProvider
-                          (fetch [_]
-                            (-fetch provider))))))}
+                      (map->Provider
+                       (-create-provider (when-let [creds (valid-credentials
+                                                           {:aws/access-key-id (System/getProperty "aws.accessKeyId")
+                                                            :aws/secret-access-key (System/getProperty "aws.secretKey")})]
+                                           (-basic-credentials-provider (clojure.set/rename-keys creds  {:aws/access-key-id :access-key-id
+                                                                                                         :aws/secret-access-key :secret-access-key})))))))}
+
 
            ;; See https://github.com/cognitect-labs/aws-api/blob/c1f9393cf6399d35b140307abf96e95ebe6c627f/src/cognitect/aws/credentials.clj#L304
            {:name "default-credentials-provider"
             :code (pr-str
-                   '(defn default-credentials-provider [_http-client]
+                   '(defn default-credentials-provider [& args]
                       (chain-credentials-provider
-                       [(-environment-credentials-provider)
-                        (-system-property-credentials-provider)
-                        (-profile-credentials-provider)
-                        (-container-credentials-provider :_dummy-http-client)
-                        (-instance-profile-credentials-provider :_dummy-http-client)])))}
-
-           {:name "basic-credentials-provider"
-            :code (pr-str
-                   '(defn basic-credentials-provider [conf]
-                      (let [provider (-basic-credentials-provider conf)]
-                        (reify CredentialsProvider
-                          (fetch [_]
-                            (-fetch provider))))))})})
+                       [(environment-credentials-provider)
+                        (system-property-credentials-provider)
+                        (profile-credentials-provider)
+                        (container-credentials-provider)
+                        (instance-profile-credentials-provider)])))})})

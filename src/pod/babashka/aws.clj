@@ -60,12 +60,16 @@
                    :vars ~(conj (mapv (fn [[k _]]
                                         {:name k})
                                       (get lookup* 'pod.babashka.aws))
-                                        ;{:name "client"}
+
                                 {:name "client"
-                                 :code (pr-str '(defn client [{:keys [credentials-provider] :as config}]
-                                                  (let [;credentials-provider (or credentials-provider (pod.babashka.aws.credentials/default-credentials-provider nil))
-                                                        ]
-                                                    (-client (assoc config :credentials-provider credentials-provider)))))}
+                                 :code
+                                 (pr-str '
+                                  (do
+                                    (require '[pod.babashka.aws.credentials :as credentials])
+                                    (defn client [{:keys [credentials-provider] :as config}]
+                                      (let [credentials-provider (or credentials-provider
+                                                                     (credentials/default-credentials-provider))]
+                                        (-client (assoc config :credentials-provider (credentials/map->Provider credentials-provider)))))))}
                                 {:name "doc"
                                  :code "(defn doc [client op]
                                           (println (-doc-str client op)))"}
