@@ -66,11 +66,17 @@ Run `script/compile`. This requires `GRAALVM_HOME` to be set.
 
 ## Test
 
-To test the pod code with JVM clojure, run `clojure -M test/script.clj`.
+Run `script/test`. This will run both the pod and the script in two separate
+JVMs.
 
-To test the native image with bb, run `bb test/script.clj`.
+To test the native-image together with babashka, run the test script while
+setting `APP_TEST_ENV` to `native`:
 
-To test with [localstack](https://github.com/localstack/localstack)
+``` shell
+APP_TEST_ENV=native script/test
+```
+
+To test with [localstack](https://github.com/localstack/localstack):
 
 ``` shell
 # Start localstack
@@ -79,7 +85,6 @@ docker-compose up -d
 # Set test credentials and run tests
 AWS_REGION=eu-north-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test script/test
 ```
-
 
 ## License
 
