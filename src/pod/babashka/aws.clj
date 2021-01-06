@@ -54,29 +54,34 @@
      (if (ident? v) (name v)
          v))
    `{:format :transit+json
-     :namespaces [{:name pod.babashka.aws
-                   :vars ~(conj (mapv (fn [[k _]]
-                                        {:name k})
-                                      (get lookup* 'pod.babashka.aws))
-                                {:name "doc"
-                                 :code "(defn doc [client op]
-                                          (println (-doc-str client op)))"}
-                                {:name "invoke"
-                                 :code "(defn invoke [client op]
-                                          (let [op (clojure.walk/postwalk (fn [x]
-                                                                            (if (instance? java.io.InputStream x)
-                                                                              (let [os (java.io.ByteArrayOutputStream.)]
-                                                                                (clojure.java.io/copy x os)
-                                                                                (.toByteArray os))
-                                                                              x))
-                                                                          op)
-                                                response (-invoke client op)]
-                                            (clojure.walk/postwalk (fn [x]
-                                                                     (if-let [[t y] (:pod.babashka.aws/wrapped x)]
-                                                                       (case t
-                                                                         :bytes (clojure.java.io/input-stream y))
-                                                                       x))
-                                                                   response)))"})}]}))
+     :namespaces
+     [{:name pod.babashka.aws
+       :vars ~(conj (mapv (fn [[k _]]
+                            {:name k})
+                          (get lookup* 'pod.babashka.aws))
+                    {:name "doc"
+                     :code (pr-str '(defn doc [client op]
+                                      (println (-doc-str client op))))}
+                    {:name "invoke"
+                     :code
+                     (pr-str '(do (require (quote clojure.java.io) (quote clojure.walk))
+                                  (defn invoke [client op]
+                                    (let [op (clojure.walk/postwalk
+                                              (fn [x]
+                                                (if (instance? java.io.InputStream x)
+                                                  (let [os (java.io.ByteArrayOutputStream.)]
+                                                    (clojure.java.io/copy x os)
+                                                    (.toByteArray os))
+                                                  x))
+                                              op)
+                                          response (-invoke client op)]
+                                      (clojure.walk/postwalk
+                                       (fn [x]
+                                         (if-let [[t y] (:pod.babashka.aws/wrapped x)]
+                                           (case t
+                                             :bytes (clojure.java.io/input-stream y))
+                                           x))
+                                       response)))))})}]}))
 
 
 (defn read-transit [^String v]
