@@ -84,7 +84,7 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
         home-dir (create-aws-credentials-file creds-file-content)]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
-      (is (= (creds/fetch (creds/profile-credentials-provider+))
+      (is (= (creds/fetch (creds/credential-process-credentials-provider))
              #:aws{:access-key-id "creds+-custom-prop-key",
                    :secret-access-key "creds+-custom-prop-secret"
                    :session-token nil
@@ -100,7 +100,7 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
         home-dir (create-aws-credentials-file creds-file-content)]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
-      (is (= (creds/fetch (creds/profile-credentials-provider+))
+      (is (= (creds/fetch (creds/credential-process-credentials-provider))
              #:aws{:access-key-id "creds+-custom-prop-key",
                    :secret-access-key "creds+-custom-prop-secret"
                    :session-token session-token

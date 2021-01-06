@@ -69,18 +69,18 @@
      "aws_session_token" SessionToken
      :Expiration Expiration}))
 
-(defn -profile-credentials-provider+
+(defn -credential-process-credentials-provider
   "Like profile-credentials-provider but with support for credential_process
 
    See https://github.com/cognitect-labs/aws-api/issues/73"
   ([jvm-props]
    (with-system-properties jvm-props
-     (-profile-credentials-provider+ jvm-props (or (u/getenv "AWS_PROFILE")
+     (-credential-process-credentials-provider jvm-props (or (u/getenv "AWS_PROFILE")
                                                    (u/getProperty "aws.profile")
                                                    "default"))))
   ([jvm-props profile-name]
    (with-system-properties jvm-props
-     (-profile-credentials-provider+ jvm-props profile-name (or (io/file (u/getenv "AWS_CREDENTIAL_PROFILES_FILE"))
+     (-credential-process-credentials-provider jvm-props profile-name (or (io/file (u/getenv "AWS_CREDENTIAL_PROFILES_FILE"))
                                                                 (io/file (u/getProperty "user.home") ".aws" "credentials")))))
   ([_jvm-props profile-name ^java.io.File f]
    (create-provider
@@ -125,7 +125,7 @@
    '-basic-credentials-provider -basic-credentials-provider
    '-system-property-credentials-provider -system-property-credentials-provider
    '-profile-credentials-provider -profile-credentials-provider
-   '-profile-credentials-provider+ -profile-credentials-provider+
+   '-credential-process-credentials-provider -credential-process-credentials-provider
    '-default-credentials-provider -default-credentials-provider})
 
 (require 'cognitect.aws.ec2-metadata-utils)
@@ -165,8 +165,8 @@
 
            {:name "profile-credentials-provider+"
             :code (pr-str
-                   '(defn profile-credentials-provider+ [& args]
-                      (map->Provider (apply -profile-credentials-provider+ (cons (jvm-properties) args)))))}
+                   '(defn credential-process-credentials-provider [& args]
+                      (map->Provider (apply -credential-process-credentials-provider (cons (jvm-properties) args)))))}
 
            {:name "basic-credentials-provider"
             :code (pr-str
