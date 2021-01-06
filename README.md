@@ -46,6 +46,13 @@ Available namespaces and functions:
 
 See [test/script.clj](test/script.clj) for an example script.
 
+## Differences with aws-cli
+
+- Credentials: currently only `~/.aws/credentials` and environment variables are supported.
+- This pod doesn't require adding dependencies for each AWS service.
+- Multi-part uploads haven't been verified to work yet.
+- Async might be added in later version.
+
 ## Build
 
 Run `script/compile`. This requires `GRAALVM_HOME` to be set.
