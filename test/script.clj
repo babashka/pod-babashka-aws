@@ -75,6 +75,10 @@
     (is (= (creds/-fetch (creds/default-credentials-provider))
            #:aws{:access-key-id "default-prop-key", :secret-access-key "default-prop-secret"})))
 
+  (is (= (creds/-fetch (creds/basic-credentials-provider {:access-key-id "basic-key"
+                                                          :secret-access-key "basic-secret"}))
+         #:aws{:access-key-id  "basic-key", :secret-access-key "basic-secret"}))
+
   (let [home-dir (create-aws-credentials-file "[default]
 aws_access_key_id=creds-prop-key
 aws_secret_access_key=creds-prop-secret")]
