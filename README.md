@@ -66,11 +66,11 @@ Run `script/compile`. This requires `GRAALVM_HOME` to be set.
 
 ## Test
 
-Run `script/test`. This will run both the pod and the script in two separate
-JVMs.
+Run `script/test`. This will run both the pod and tests (defined in
+`test/script.clj`) in two separate JVMs.
 
-To test the native-image together with babashka, run the test script while
-setting `APP_TEST_ENV` to `native`:
+To test the native-image together with babashka, run the tests while setting
+`APP_TEST_ENV` to `native`:
 
 ``` shell
 APP_TEST_ENV=native script/test
