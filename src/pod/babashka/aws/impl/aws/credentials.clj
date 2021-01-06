@@ -148,7 +148,7 @@
                    '(defn profile-credentials-provider [& args]
                       (apply -profile-credentials-provider (cons (jvm-properties) args))))}
 
-           {:name "profile-credentials-provider+"
+           {:name "credential-process-credentials-provider"
             :code (pr-str
                    '(defn credential-process-credentials-provider [& args]
                       (apply -credential-process-credentials-provider (cons (jvm-properties) args))))}
