@@ -68,6 +68,17 @@ To test the pod code with JVM clojure, run `clojure -M test/script.clj`.
 
 To test the native image with bb, run `bb test/script.clj`.
 
+To test with [localstack](https://github.com/localstack/localstack)
+
+``` shell
+# Start localstack
+docker-compose up -d
+
+# Set test credentials and run tests
+AWS_REGION=eu-north-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test script/test
+```
+
+
 ## License
 
 Copyright © 2020 Michiel Borkent, Jeroen van Dijk, Rahul De and Valtteri Harmainen.
