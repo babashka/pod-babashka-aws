@@ -56,7 +56,7 @@ See [test/script.clj](test/script.clj) for an example script.
 
 - Credentials: currently only `~/.aws/credentials` and environment variables are supported.
 - This pod doesn't require adding dependencies for each AWS service.
-- Async might be added in later version.
+- Async might be added in a later version.
 
 ## Build
 
