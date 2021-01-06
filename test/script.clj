@@ -55,7 +55,7 @@
 (defn create-aws-credentials-file [content]
   (let [temp-dir (create-temp-dir "pod-babashka-aws-" "-credentials")
         creds-file (clojure.java.io/file temp-dir ".aws/credentials")]
-    (.mkdirs (.getParentFile creds-file))
+    (clojure.java.io/make-parents creds-file)
     (spit creds-file content)
     ;; Return home dir
     (.getPath temp-dir)))
