@@ -107,6 +107,18 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
                    ;; Test runs within a second, so with flooring and the cutoff of 300, the ttl is 299
                    :cognitect.aws.credentials/ttl 299})))))
 
+(require '[pod.babashka.aws.config :as config])
+
+(deftest aws-config-test
+  (let [creds-file-content "[custom]
+aws_access_key_id=creds-custom-prop-key
+aws_secret_access_key=creds-custom-prop-secret"
+        home-dir (create-aws-credentials-file creds-file-content)]
+    (is (= (config/parse (str home-dir
+
+                              "/.aws/credentials"))
+           {"custom" {"aws_access_key_id" "creds-custom-prop-key",
+                      "aws_secret_access_key" "creds-custom-prop-secret"}))))
 
 (when-not (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (shutdown-agents))
