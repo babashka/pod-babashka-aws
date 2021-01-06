@@ -34,6 +34,65 @@
        (with-out-str (aws/doc s3 :ListBuckets))
        "Returns a list of all buckets")))
 
+(require '[pod.babashka.aws.credentials :as creds])
+
+(defmacro with-system-properties [props & body]
+  `(let [props# (System/getProperties)]
+     (try
+       (doseq [[k# v#] ~props]
+         (System/setProperty k# v#))
+       ~@body
+       (finally
+         (System/setProperties props#)))))
+
+(defn create-temp-dir [prefix affix]
+  (let [f (java.io.File/createTempFile prefix affix)]
+    (.delete f)
+    (.mkdir f)
+    f))
+
+
+(defn create-aws-credentials-file [content]
+  (let [temp-dir (create-temp-dir "pod-babashka-aws-" "-credentials")
+        creds-file (clojure.java.io/file temp-dir ".aws/credentials")]
+    (.mkdirs (.getParentFile creds-file))
+    (spit creds-file content)
+    ;; Return home dir
+    (.getPath temp-dir)))
+
+(deftest aws-credentials-test
+  (is (= (creds/-fetch (creds/basic-credentials-provider {:access-key-id "key"
+                                                          :secret-access-key "secret"}))
+         #:aws{:access-key-id "key", :secret-access-key "secret"}))
+
+  (with-system-properties {"aws.accessKeyId" "prop-key"
+                           "aws.secretKey" "prop-secret"}
+    (is (= (creds/-fetch (creds/system-property-credentials-provider))
+           #:aws{:access-key-id "prop-key", :secret-access-key "prop-secret"})))
+
+  (with-system-properties {"aws.accessKeyId" "default-prop-key"
+                           "aws.secretKey" "default-prop-secret"}
+    (is (= (creds/-fetch (creds/default-credentials-provider))
+           #:aws{:access-key-id "default-prop-key", :secret-access-key "default-prop-secret"})))
+
+  (let [home-dir (create-aws-credentials-file "[default]
+aws_access_key_id=creds-prop-key
+aws_secret_access_key=creds-prop-secret")]
+    (with-system-properties {"user.home" home-dir}
+      (is (= (creds/-fetch (creds/profile-credentials-provider))
+             #:aws{:access-key-id "creds-prop-key", :secret-access-key "creds-prop-secret"
+                   :session-token nil}))))
+
+  (let [home-dir (create-aws-credentials-file "[custom]
+aws_access_key_id=creds-custom-prop-key
+aws_secret_access_key=creds-custom-prop-secret")]
+    (with-system-properties {"user.home" home-dir
+                             "aws.profile" "custom"}
+      (is (= (creds/-fetch (creds/profile-credentials-provider))
+             #:aws{:access-key-id "creds-custom-prop-key", :secret-access-key "creds-custom-prop-secret"
+                   :session-token nil})))))
+
+
 (deftest aws-invoke-test
   ;; tests cannot be conditionally defined in bb currently, see #705, so moved
   ;; the conditions inside the test
