@@ -22,9 +22,17 @@
 
 (require '[pod.babashka.aws :as aws])
 
+;; TODO maybe less implicit config for this
+(defn localstack? []
+  (= "test" (System/getenv "AWS_ACCESS_KEY_ID") (System/getenv "AWS_SECRET_ACCESS_KEY")))
+
+(def localstack-endpoint {:protocol :http :hostname "localhost" :port 4566})
+
 (def region (System/getenv "AWS_REGION"))
-(def s3 (aws/client {:api :s3 :region
-                     (or region "eu-central-1")}))
+(def s3 (aws/client (merge
+                     {:api :s3 :region (or region "eu-central-1") }
+                     (when (localstack?)
+                       {:endpoint-override localstack-endpoint}))))
 
 (deftest aws-ops-test
   (is (contains? (aws/ops s3) :ListBuckets)))
