@@ -45,20 +45,18 @@
        (finally
          (System/setProperties props#)))))
 
-(defn create-temp-dir [prefix affix]
-  (let [f (java.io.File/createTempFile prefix affix)]
-    (.delete f)
-    (.mkdir f)
-    f))
-
+(defn create-temp-dir [prefix]
+  (str (java.nio.file.Files/createTempDirectory
+        prefix
+        (into-array java.nio.file.attribute.FileAttribute []))))
 
 (defn create-aws-credentials-file [content]
-  (let [temp-dir (create-temp-dir "pod-babashka-aws-" "-credentials")
+  (let [temp-dir (create-temp-dir "pod-babashka-aws")
         creds-file (clojure.java.io/file temp-dir ".aws/credentials")]
     (clojure.java.io/make-parents creds-file)
     (spit creds-file content)
     ;; Return home dir
-    (.getPath temp-dir)))
+    temp-dir))
 
 (deftest aws-credentials-test
   (is (= (creds/-fetch (creds/basic-credentials-provider {:access-key-id "key"
