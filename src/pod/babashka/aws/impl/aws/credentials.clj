@@ -109,11 +109,6 @@
    (with-system-properties jvm-props
      (create-provider (creds/default-credentials-provider @http-client))))
 
-(extend-protocol creds/CredentialsProvider
-  clojure.lang.PersistentArrayMap
-  (fetch [m]
-    (creds/fetch (get-provider m))))
-
 ;;; Pod Client
 
 (defn -fetch [provider]
@@ -121,7 +116,7 @@
     (creds/fetch provider)))
 
 (def lookup-map
-  {'-fetch -fetch
+  {'fetch -fetch
    '-basic-credentials-provider -basic-credentials-provider
    '-system-property-credentials-provider -system-property-credentials-provider
    '-profile-credentials-provider -profile-credentials-provider
@@ -143,16 +138,6 @@
     ~(conj (mapv (fn [[k _]]
                    {:name k})
                  lookup-map)
-           {:name "fetch"
-            :code (pr-str
-                   '(defprotocol CredentialsProvider
-                      (fetch [_])))}
-           {:name "map->Provider"
-            :code (pr-str
-                   '(defrecord Provider [provider-id]
-                      CredentialsProvider
-                      (fetch [provider]
-                        (-fetch provider))))}
            {:name "jvm-properties"
             :code (format
                      "(defn jvm-properties []
@@ -161,24 +146,24 @@
            {:name "profile-credentials-provider"
             :code (pr-str
                    '(defn profile-credentials-provider [& args]
-                      (map->Provider (apply -profile-credentials-provider (cons (jvm-properties) args)))))}
+                      (apply -profile-credentials-provider (cons (jvm-properties) args))))}
 
            {:name "profile-credentials-provider+"
             :code (pr-str
                    '(defn credential-process-credentials-provider [& args]
-                      (map->Provider (apply -credential-process-credentials-provider (cons (jvm-properties) args)))))}
+                      (apply -credential-process-credentials-provider (cons (jvm-properties) args))))}
 
            {:name "basic-credentials-provider"
             :code (pr-str
                    '(defn basic-credentials-provider [conf]
-                      (map->Provider (-basic-credentials-provider conf))))}
+                      (-basic-credentials-provider conf)))}
 
            {:name "system-property-credentials-provider"
             :code (pr-str
                    '(defn system-property-credentials-provider []
-                      (map->Provider (-system-property-credentials-provider (jvm-properties)))))}
+                      (-system-property-credentials-provider (jvm-properties))))}
 
            {:name "default-credentials-provider"
             :code (pr-str
                    '(defn default-credentials-provider [& _]
-                      (map->Provider (-default-credentials-provider (jvm-properties)))))})})
+                      (-default-credentials-provider (jvm-properties))))})})
