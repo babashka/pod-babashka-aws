@@ -128,6 +128,15 @@
    '-profile-credentials-provider+ -profile-credentials-provider+
    '-default-credentials-provider -default-credentials-provider})
 
+(require 'cognitect.aws.ec2-metadata-utils)
+
+(def relevant-jvm-properties ["user.home"
+                              "aws.profile"
+                              "aws.accessKeyId"
+                              "aws.secretKey"
+                              "aws.region"
+                              cognitect.aws.ec2-metadata-utils/ec2-metadata-service-override-system-property])
+
 (def describe-map
   `{:name pod.babashka.aws.credentials
     :vars
@@ -144,15 +153,20 @@
                       CredentialsProvider
                       (fetch [provider]
                         (-fetch provider))))}
+           {:name "jvm-properties"
+            :code (format
+                     "(defn jvm-properties []
+                        (select-keys (System/getProperties) %s))" relevant-jvm-properties)}
+
            {:name "profile-credentials-provider"
             :code (pr-str
                    '(defn profile-credentials-provider [& args]
-                      (map->Provider (apply -profile-credentials-provider (cons (System/getProperties) args)))))}
+                      (map->Provider (apply -profile-credentials-provider (cons (jvm-properties) args)))))}
 
            {:name "profile-credentials-provider+"
             :code (pr-str
                    '(defn profile-credentials-provider+ [& args]
-                      (map->Provider (apply -profile-credentials-provider+ (cons (System/getProperties) args)))))}
+                      (map->Provider (apply -profile-credentials-provider+ (cons (jvm-properties) args)))))}
 
            {:name "basic-credentials-provider"
             :code (pr-str
@@ -162,9 +176,9 @@
            {:name "system-property-credentials-provider"
             :code (pr-str
                    '(defn system-property-credentials-provider []
-                      (map->Provider (-system-property-credentials-provider (System/getProperties)))))}
+                      (map->Provider (-system-property-credentials-provider (jvm-properties)))))}
 
            {:name "default-credentials-provider"
             :code (pr-str
                    '(defn default-credentials-provider [& _]
-                      (map->Provider (-default-credentials-provider (System/getProperties)))))})})
+                      (map->Provider (-default-credentials-provider (jvm-properties)))))})})
