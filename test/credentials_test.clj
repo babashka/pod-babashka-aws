@@ -118,7 +118,7 @@ aws_secret_access_key=creds-custom-prop-secret"
 
                               "/.aws/credentials"))
            {"custom" {"aws_access_key_id" "creds-custom-prop-key",
-                      "aws_secret_access_key" "creds-custom-prop-secret"}))))
+                      "aws_secret_access_key" "creds-custom-prop-secret"}}))))
 
 (when-not (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (shutdown-agents))
