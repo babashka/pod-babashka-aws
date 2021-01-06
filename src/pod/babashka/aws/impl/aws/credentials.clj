@@ -2,7 +2,6 @@
   (:require
    [clojure.edn]
    [clojure.java.io :as io]
-   [clojure.set]
    [cognitect.aws.client.api :as aws]
    [cognitect.aws.credentials :as creds]
    [pod.babashka.aws.impl.aws]))
@@ -105,13 +104,15 @@
 
            {:name "system-property-credentials-provider"
             :code (pr-str
-                   '(defn system-property-credentials-provider []
-                      (map->Provider
-                       (-create-provider (when-let [creds (valid-credentials
-                                                           {:aws/access-key-id (System/getProperty "aws.accessKeyId")
-                                                            :aws/secret-access-key (System/getProperty "aws.secretKey")})]
-                                           (-basic-credentials-provider (clojure.set/rename-keys creds  {:aws/access-key-id :access-key-id
-                                                                                                         :aws/secret-access-key :secret-access-key})))))))}
+                   '(do
+                      (require '[clojure.set])
+                      (defn system-property-credentials-provider []
+                        (map->Provider
+                         (-create-provider (when-let [creds (valid-credentials
+                                                             {:aws/access-key-id (System/getProperty "aws.accessKeyId")
+                                                              :aws/secret-access-key (System/getProperty "aws.secretKey")})]
+                                             (-basic-credentials-provider (clojure.set/rename-keys creds  {:aws/access-key-id :access-key-id
+                                                                                                           :aws/secret-access-key :secret-access-key}))))))))}
 
 
            ;; See https://github.com/cognitect-labs/aws-api/blob/c1f9393cf6399d35b140307abf96e95ebe6c627f/src/cognitect/aws/credentials.clj#L304
