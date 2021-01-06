@@ -53,5 +53,5 @@ build_script:
     call script/compile.bat
 
 artifacts:
-- path: pod-babashka-buddy-*-windows-amd64.zip
-  name: pod-babashka-buddy
+- path: pod-babashka-aws-*-windows-amd64.zip
+  name: pod-babashka-aws
