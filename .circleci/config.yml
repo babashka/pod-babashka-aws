@@ -3,11 +3,16 @@
 # Check https://circleci.com/docs/2.0/language-clojure/ for more details
 #
 version: 2.1
+# orbs:
+#   wait-for: cobli/wait-for@0.0.2
 jobs:
   jvm:
     docker:
       # specify the version you desire here
       - image: circleci/clojure:lein-2.9.3-buster
+      - image: localstack/localstack
+        environment:
+          SERVICES: s3
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
@@ -28,8 +33,14 @@ jobs:
             wget -nc https://download.clojure.org/install/linux-install-1.10.1.727.sh
             chmod +x linux-install-1.10.1.727.sh
             sudo ./linux-install-1.10.1.727.sh
+      # - wait-for/localstack-s3:
+      #     port: 4566
       - run:
           name: Run JVM tests
+          environment:
+            AWS_ACCESS_KEY_ID: test
+            AWS_SECRET_ACCESS_KEY: test
+            AWS_REGION: eu-west-1
           command: |
             script/test
       - save_cache:
@@ -39,6 +50,9 @@ jobs:
   linux:
     docker:
       - image: circleci/clojure:lein-2.9.3-buster
+      - image: localstack/localstack
+        environment:
+          SERVICES: s3
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
@@ -86,6 +100,10 @@ jobs:
               --dir bb --download-dir bb
       - run:
           name: Run test
+          environment:
+            AWS_ACCESS_KEY_ID: test
+            AWS_SECRET_ACCESS_KEY: test
+            AWS_REGION: eu-west-1
           command: PATH=$PATH:bb script/test
       - run:
           name: Release
