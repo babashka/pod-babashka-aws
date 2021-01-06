@@ -97,14 +97,34 @@ aws_secret_access_key=creds-custom-prop-secret")]
                    :session-token nil}))))
 
 
-  (let [home-dir (create-aws-credentials-file "[custom]
-credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretAccessKey\":\"creds+-custom-prop-secret\",\"Version\":1}'")]
+  (let [expiration (str (.plus (java.time.Instant/now) 10 java.time.temporal.ChronoUnit/MINUTES))
+        creds-file-content (format "[custom]
+credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretAccessKey\":\"creds+-custom-prop-secret\",\"Version\":1,\"Expiration\":\"%s\"}'" expiration)
+        home-dir (create-aws-credentials-file creds-file-content)]
     (with-system-properties {"user.home" home-dir
                              "aws.profile" "custom"}
       (is (= (creds/-fetch (creds/profile-credentials-provider+))
              #:aws{:access-key-id "creds+-custom-prop-key",
                    :secret-access-key "creds+-custom-prop-secret"
-                   :session-token nil})))))
+                   :session-token nil
+                   :cognitect.aws.credentials/ttl (dec 300)}))))
+
+
+  (let [expiration (str (.plus (java.time.Instant/now) 10 java.time.temporal.ChronoUnit/MINUTES))
+        session-token "my-session-token"
+        creds-file-content (format "[custom]
+credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretAccessKey\":\"creds+-custom-prop-secret\",\"SessionToken\":\"%s\",\"Version\":1,\"Expiration\":\"%s\"}'"
+                                   session-token
+                                   expiration)
+        home-dir (create-aws-credentials-file creds-file-content)]
+    (with-system-properties {"user.home" home-dir
+                             "aws.profile" "custom"}
+      (is (= (creds/-fetch (creds/profile-credentials-provider+))
+             #:aws{:access-key-id "creds+-custom-prop-key",
+                   :secret-access-key "creds+-custom-prop-secret"
+                   :session-token session-token
+                   ;; Test runs within a second, so with flooring and the cutoff of 300, the ttl is 299
+                   :cognitect.aws.credentials/ttl 299})))))
 
 
 (deftest aws-invoke-test

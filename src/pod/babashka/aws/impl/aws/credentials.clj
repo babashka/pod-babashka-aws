@@ -62,11 +62,12 @@
 
 (defn get-credentials-via-cmd [cmd]
   (let [credential-map (json/read-str (run-credential-process-cmd cmd))
-        {:strs [AccessKeyId SecretAccessKey SessionToken]} credential-map]
+        {:strs [AccessKeyId SecretAccessKey SessionToken Expiration]} credential-map]
     (assert (and AccessKeyId SecretAccessKey))
     {"aws_access_key_id" AccessKeyId
      "aws_secret_access_key" SecretAccessKey
-     "aws_session_token" SessionToken}))
+     "aws_session_token" SessionToken
+     :Expiration Expiration}))
 
 (defn -profile-credentials-provider+
   "Like profile-credentials-provider but with support for credential_process
@@ -93,9 +94,10 @@
                              (merge profile (get-credentials-via-cmd cmd))
                              profile)]
                (creds/valid-credentials
-                {:aws/access-key-id     (get profile "aws_access_key_id")
-                 :aws/secret-access-key (get profile "aws_secret_access_key")
-                 :aws/session-token     (get profile "aws_session_token")}
+                (cond-> {:aws/access-key-id     (get profile "aws_access_key_id")
+                         :aws/secret-access-key (get profile "aws_secret_access_key")
+                         :aws/session-token     (get profile "aws_session_token")
+                         ::creds/ttl (creds/calculate-ttl profile)})
                 "aws profiles file"))
              (catch Throwable t
                (log/error t "Error fetching credentials from aws profiles file")
