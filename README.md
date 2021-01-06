@@ -56,6 +56,10 @@ To test the pod code with JVM clojure, run `clojure -M test/script.clj`.
 
 To test the native image with bb, run `bb test/script.clj`.
 
+## Thanks
+
+Thanks to Valtteri Harmainen for feedback on and testing the initial version.
+
 ## License
 
 Copyright © 2020 Michiel Borkent, Jeroen van Dijk and Rahul De.
