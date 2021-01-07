@@ -24,7 +24,7 @@ Available namespaces and functions:
 
 (require '[babashka.pods :as pods])
 
-(pods/load-pod 'org.babashka/aws "0.0.1")
+(pods/load-pod 'org.babashka/aws "0.0.2")
 
 (require '[pod.babashka.aws :as aws])
 
@@ -48,8 +48,7 @@ Available namespaces and functions:
             {:op :PutObject
              :request {:Bucket "pod-babashka-aws"
                        :Key "logo.png"
-                       :Body (io/input-stream
-                              (io/file "resources" "babashka.png"))}})
+                       :Body (io/file "resources" "babashka.png")}})
 ```
 
 See [test/script.clj](test/script.clj) for an example script.
@@ -93,6 +92,8 @@ The `credential_process` entry can be any cli command that prints the right json
 - Credentials: custom flows are supported, but not by extending CredentialsProvider interface, see <a href="#credentials">Credentials</a>) for options.
 - This pod doesn't require adding dependencies for each AWS service.
 - Async might be added in a later version.
+- For uploading (big) files (e.g. to S3), it is better for memory consumption to
+  pass a `java.io.File` directly, rather than an input-stream.
 
 ## Build
 
@@ -100,11 +101,17 @@ Run `script/compile`. This requires `GRAALVM_HOME` to be set.
 
 ## Test
 
-To test the pod code with JVM clojure, run `clojure -M test/script.clj`.
+Run `script/test`. This will run both the pod and tests (defined in
+`test/script.clj`) in two separate JVMs.
 
-To test the native image with bb, run `bb test/script.clj`.
+To test the native-image together with babashka, run the tests while setting
+`APP_TEST_ENV` to `native`:
 
-To test with [localstack](https://github.com/localstack/localstack)
+``` shell
+APP_TEST_ENV=native script/test
+```
+
+To test with [localstack](https://github.com/localstack/localstack):
 
 ``` shell
 # Start localstack
@@ -113,7 +120,6 @@ docker-compose up -d
 # Set test credentials and run tests
 AWS_REGION=eu-north-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test script/test
 ```
-
 
 ## License
 

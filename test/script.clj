@@ -82,6 +82,17 @@
                                    :request {:Bucket "pod-babashka-aws"
                                              :Key "logo.png"}})
               bytes (read-bytes (:Body get2))
+              _ (is (= (count png) (count bytes)))
+              put3 (testing "file arg"
+                     (aws/invoke s3 {:op :PutObject
+                                     :request {:Bucket "pod-babashka-aws"
+                                               :Key "logo.png"
+                                               :Body (io/file "resources" "babashka.png")}}))
+              _ (is (not (:Error put3)))
+              get3 (aws/invoke s3 {:op :GetObject
+                                   :request {:Bucket "pod-babashka-aws"
+                                             :Key "logo.png"}})
+              bytes (read-bytes (:Body get3))
               _ (is (= (count png) (count bytes)))]
           :the-end))
     (println "Skipping credential test")))

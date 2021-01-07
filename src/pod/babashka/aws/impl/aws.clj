@@ -2,6 +2,7 @@
   (:require
    [clojure.edn]
    [clojure.java.io :as io]
+   [clojure.walk :as walk]
    [cognitect.aws.client.api :as aws]
    ;; these are dynamically loaded at runtime
    [cognitect.aws.http.cognitect]
@@ -12,6 +13,8 @@
    [cognitect.aws.protocols.rest]
    [cognitect.aws.protocols.rest-json]
    [cognitect.aws.protocols.rest-xml]))
+
+(set! *warn-on-reflection* true)
 
 (def http-client (delay (cognitect.aws.http.cognitect/create)))
 
@@ -40,7 +43,7 @@
     (aws/doc (get-client client) op)))
 
 (defn ^bytes input-stream->byte-array [^java.io.InputStream is]
-  (let [os (java.io.ByteArrayOutputStream.)]
+  (with-open [os (java.io.ByteArrayOutputStream.)]
     (io/copy is os)
     (.toByteArray os)))
 
@@ -53,7 +56,27 @@
 
   java.io.InputStream
   (wrap-object [x]
-    {:pod.babashka.aws/wrapped [:bytes (input-stream->byte-array x)]}))
+    {:pod.babashka.aws/wrapped
+     [:bytes (let [bytes (input-stream->byte-array x)]
+               (.close ^java.io.InputStream x)
+               bytes)]}))
 
 (defn -invoke [client op]
-  (clojure.walk/postwalk wrap-object (aws/invoke (get-client client) op)))
+  (let [streams (atom [])
+        unwrap (fn [x]
+                 (if (map? x)
+                   (if-let [v (:pod.babashka.aws/wrapped x)]
+                     (let [[k obj] v]
+                       (case k
+                         :file
+                         (let [stream (io/input-stream (io/file obj))]
+                           (swap! streams conj stream)
+                           stream)))
+                     x)
+                   x))
+        op (walk/postwalk unwrap op)
+        resp (aws/invoke (get-client client) op)]
+    ;; clean up input-streams create for file reads
+    (doseq [stream @streams]
+      (.close ^java.io.InputStream stream))
+    (walk/postwalk wrap-object resp)))
