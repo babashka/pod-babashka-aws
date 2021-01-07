@@ -3,6 +3,14 @@
 if [[ "$APP_TEST_ENV" == "native" ]]
 then
   bb test/script.clj
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_REGION
+  bb test/credentials_test.clj
 else
   clojure -M test/script.clj
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_REGION
+  clojure -M test/credentials_test.clj
 fi
