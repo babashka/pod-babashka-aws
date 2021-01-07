@@ -61,7 +61,10 @@
 
   java.io.InputStream
   (wrap-object [x]
-    {:pod.babashka.aws/wrapped [:bytes (input-stream->byte-array x)]}))
+    {:pod.babashka.aws/wrapped
+     [:bytes (let [bytes (input-stream->byte-array x)]
+               (.close ^java.io.InputStream x)
+               bytes)]}))
 
 (defn -invoke [client op]
   (let [streams (atom [])
