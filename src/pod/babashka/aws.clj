@@ -5,8 +5,10 @@
             [clojure.spec.alpha]
             [clojure.string :as str]
             [clojure.walk :as walk]
+            [cognitect.aws.config :as aws.config]
             [cognitect.transit :as transit]
-            [pod.babashka.aws.impl.aws :as aws])
+            [pod.babashka.aws.impl.aws :as aws]
+            [pod.babashka.aws.impl.aws.credentials :as credentials])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -36,8 +38,11 @@
   (bencode/read-bencode stream))
 
 (def lookup*
-  {'pod.babashka.aws
-   {'client aws/client
+  {'pod.babashka.aws.credentials credentials/lookup-map
+   'pod.babashka.aws.config
+   {'parse aws.config/parse}
+   'pod.babashka.aws
+   {'-client aws/-client
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
     'ops aws/ops
@@ -78,10 +83,24 @@
          v))
    `{:format :transit+json
      :namespaces
-     [{:name pod.babashka.aws
+     [~credentials/describe-map
+      {:name pod.babashka.aws.config
+       :vars ~(mapv (fn [[k _]]
+                     {:name k})
+                   (get lookup* 'pod.babashka.aws.config))}
+      {:name pod.babashka.aws
        :vars ~(conj (mapv (fn [[k _]]
                             {:name k})
                           (get lookup* 'pod.babashka.aws))
+                    {:name "client"
+                     :code
+                     (pr-str
+                      '(do
+                         (require '[pod.babashka.aws.credentials :as credentials])
+                         (defn client [{:keys [credentials-provider] :as config}]
+                           (let [credentials-provider (or credentials-provider
+                                                          (credentials/default-credentials-provider))]
+                             (-client (assoc config :credentials-provider credentials-provider))))))}
                     {:name "doc"
                      :code (pr-str '(defn doc [client op]
                                       (println (-doc-str client op))))}

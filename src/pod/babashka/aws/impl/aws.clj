@@ -18,11 +18,6 @@
 
 (def http-client (delay (cognitect.aws.http.cognitect/create)))
 
-#_(def *credential-providers (atom {}))
-
-#_(defn get-credential-provider [config]
-  (get @*credential-providers (get config ::credential-provider-id)))
-
 (def services (into (sorted-set) (clojure.edn/read-string (slurp (io/resource "aws-services.edn")))))
 
 (def *clients (atom {}))
@@ -30,7 +25,7 @@
 (defn get-client [config]
   (get @*clients (get config ::client-id)))
 
-(defn client [{:keys [api credentials-provider] :as config}]
+(defn -client [{:keys [api] :as config}]
   (if-not (contains? services api)
     (throw (ex-info (str "api " api " not available") {:available services}))
     (let [config (assoc config
