@@ -5,7 +5,6 @@
    [clojure.java.io :as io]
    [clojure.java.shell :as shell]
    [clojure.tools.logging :as log]
-   [cognitect.aws.client.api :as aws]
    [cognitect.aws.config :as config]
    [cognitect.aws.credentials :as creds]
    [cognitect.aws.util :as u]
@@ -13,7 +12,7 @@
 
 ;;; Pod Backend
 
- (def *providers (atom {}))
+(def *providers (atom {}))
 
 (defn create-provider [provider]
   (let [provider-id (java.util.UUID/randomUUID)]
@@ -51,7 +50,7 @@
    (with-system-properties jvm-props
      (create-provider (creds/profile-credentials-provider profile-name))))
 
-  ([jvm-props profile-name ^java.io.File f]
+  ([_jvm-props _profile-name ^java.io.File _f]
    (throw (ex-info "profile-credentials-provider with 2 arguments not supported yet" {}))))
 
 (defn run-credential-process-cmd [cmd]
@@ -76,12 +75,12 @@
   ([jvm-props]
    (with-system-properties jvm-props
      (-credential-process-credentials-provider jvm-props (or (u/getenv "AWS_PROFILE")
-                                                   (u/getProperty "aws.profile")
-                                                   "default"))))
+                                                             (u/getProperty "aws.profile")
+                                                             "default"))))
   ([jvm-props profile-name]
    (with-system-properties jvm-props
      (-credential-process-credentials-provider jvm-props profile-name (or (io/file (u/getenv "AWS_CREDENTIAL_PROFILES_FILE"))
-                                                                (io/file (u/getProperty "user.home") ".aws" "credentials")))))
+                                                                          (io/file (u/getProperty "user.home") ".aws" "credentials")))))
   ([_jvm-props profile-name ^java.io.File f]
    (create-provider
     (creds/auto-refreshing-credentials
@@ -94,10 +93,10 @@
                              (merge profile (get-credentials-via-cmd cmd))
                              profile)]
                (creds/valid-credentials
-                (cond-> {:aws/access-key-id     (get profile "aws_access_key_id")
-                         :aws/secret-access-key (get profile "aws_secret_access_key")
-                         :aws/session-token     (get profile "aws_session_token")
-                         ::creds/ttl (creds/calculate-ttl profile)})
+                {:aws/access-key-id     (get profile "aws_access_key_id")
+                 :aws/secret-access-key (get profile "aws_secret_access_key")
+                 :aws/session-token     (get profile "aws_session_token")
+                 ::creds/ttl (creds/calculate-ttl profile)}
                 "aws profiles file"))
              (catch Throwable t
                (log/error t "Error fetching credentials from aws profiles file")
@@ -106,8 +105,8 @@
 (def http-client pod.babashka.aws.impl.aws/http-client)
 
 (defn -default-credentials-provider [jvm-props]
-   (with-system-properties jvm-props
-     (create-provider (creds/default-credentials-provider @http-client))))
+  (with-system-properties jvm-props
+    (create-provider (creds/default-credentials-provider @http-client))))
 
 (extend-protocol creds/CredentialsProvider
   clojure.lang.PersistentArrayMap
@@ -143,20 +142,20 @@
     ~(conj (mapv (fn [[k _]]
                    {:name k})
                  lookup-map)
-           {:name "jvm-properties"
+           {:name "-jvm-properties"
             :code (format
-                     "(defn jvm-properties []
+                   "(defn -jvm-properties []
                         (select-keys (System/getProperties) %s))" relevant-jvm-properties)}
 
            {:name "profile-credentials-provider"
             :code (pr-str
                    '(defn profile-credentials-provider [& args]
-                      (apply -profile-credentials-provider (cons (jvm-properties) args))))}
+                      (apply -profile-credentials-provider (cons (-jvm-properties) args))))}
 
            {:name "credential-process-credentials-provider"
             :code (pr-str
                    '(defn credential-process-credentials-provider [& args]
-                      (apply -credential-process-credentials-provider (cons (jvm-properties) args))))}
+                      (apply -credential-process-credentials-provider (cons (-jvm-properties) args))))}
 
            {:name "basic-credentials-provider"
             :code (pr-str
@@ -166,9 +165,9 @@
            {:name "system-property-credentials-provider"
             :code (pr-str
                    '(defn system-property-credentials-provider []
-                      (-system-property-credentials-provider (jvm-properties))))}
+                      (-system-property-credentials-provider (-jvm-properties))))}
 
            {:name "default-credentials-provider"
             :code (pr-str
                    '(defn default-credentials-provider [& _]
-                      (-default-credentials-provider (jvm-properties))))})})
+                      (-default-credentials-provider (-jvm-properties))))})})
