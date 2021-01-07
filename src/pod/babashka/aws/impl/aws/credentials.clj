@@ -4,11 +4,14 @@
    [clojure.edn]
    [clojure.java.io :as io]
    [clojure.java.shell :as shell]
+   [clojure.string :as str]
    [clojure.tools.logging :as log]
    [cognitect.aws.config :as config]
    [cognitect.aws.credentials :as creds]
    [cognitect.aws.util :as u]
    [pod.babashka.aws.impl.aws]))
+
+(set! *warn-on-reflection* true)
 
 ;;; Pod Backend
 
@@ -53,8 +56,60 @@
   ([_jvm-props _profile-name ^java.io.File _f]
    (throw (ex-info "profile-credentials-provider with 2 arguments not supported yet" {}))))
 
+(def windows? (-> (System/getProperty "os.name")
+                  (str/lower-case)
+                  (str/includes? "win")))
+
+;; parse-cmd accept the following formats:
+#_["\"foo   bar\"    a b c \"the d\""
+   "\"foo \\\"  bar\"    a b c \"the d\""
+   "echo '{\"AccessKeyId\":\"****\",\"SecretAccessKey\":\"***\",\"Version\":1}'"
+   "echo 'foo bar'"]
+
+(defn parse-cmd [s]
+  (loop [s (java.io.StringReader. s)
+         in-double-quotes? false
+         in-single-quotes? false
+         buf (java.io.StringWriter.)
+         parsed []]
+    (let [c (.read s)]
+      (cond
+        (= -1 c) parsed
+        (= 39 c) ;; single-quotes
+        (if in-single-quotes?
+          ;; exit single-quoted string
+          (recur s in-double-quotes? false (java.io.StringWriter.) (conj parsed (str buf)))
+          ;; enter single-quoted string
+          (recur s in-double-quotes? true buf parsed))
+        (= 92 c) ;; assume escaped quote
+        (let [escaped (.read s)
+              buf (doto buf (.write escaped))]
+          (recur s in-double-quotes? in-single-quotes? buf parsed))
+        (and (not in-single-quotes?) (= 34 c)) ;; double quote
+        (if in-double-quotes?
+          ;; exit double-quoted string
+          (recur s false in-single-quotes? (java.io.StringWriter.) (conj parsed (str buf)))
+          ;; enter double-quoted string
+          (recur s true in-single-quotes? buf parsed))
+        (and (not in-double-quotes?)
+             (not in-single-quotes?)
+             (Character/isWhitespace c))
+        (recur s in-double-quotes? in-single-quotes? (java.io.StringWriter.)
+               (let [bs (str buf)]
+                 (cond-> parsed
+                   (not (str/blank? bs)) (conj bs))))
+        :else (do
+                (.write buf c)
+                (recur s in-double-quotes? in-single-quotes? buf parsed))))))
+
 (defn run-credential-process-cmd [cmd]
-  (let [{:keys [exit out err]} (shell/sh "bash" "-c" cmd)]
+  (let [cmd (parse-cmd cmd)
+        cmd (if windows?
+              (mapv #(str/replace % "\"" "\\\"")
+                    cmd)
+              cmd)
+        ;; _ (binding [*out* *err*] (prn :cmd cmd))
+        {:keys [exit out err]} (apply shell/sh cmd)]
     (if (zero? exit)
       out
       (throw (ex-info (str "Non-zero exit: " (pr-str err)) {})))))
