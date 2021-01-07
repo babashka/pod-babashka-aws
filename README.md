@@ -59,6 +59,8 @@ See [test/script.clj](test/script.clj) for an example script.
 - Credentials: currently only `~/.aws/credentials` and environment variables are supported.
 - This pod doesn't require adding dependencies for each AWS service.
 - Async might be added in a later version.
+- For uploading big files (e.g. to S3), it is better for memory consumption to
+  pass a `java.io.File` directly, rather than an input-stream.
 
 ## Build
 

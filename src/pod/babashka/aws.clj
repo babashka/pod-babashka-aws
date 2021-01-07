@@ -48,6 +48,29 @@
         var-name (symbol (name var))]
     (get-in lookup* [var-ns var-name])))
 
+(def invoke
+  '(do (require (quote clojure.java.io) (quote clojure.walk))
+       (defn invoke [client op]
+         (let [op (clojure.walk/postwalk
+                   (fn [x]
+                     (cond
+                       (instance? java.io.InputStream x)
+                       (let [os (java.io.ByteArrayOutputStream.)]
+                         (clojure.java.io/copy x os)
+                         (.toByteArray os))
+                       (instance? java.io.File x)
+                       {:pod.babashka.aws/wrapped [:file (.getPath ^java.io.File x)]}
+                       :else x))
+                   op)
+               response (-invoke client op)]
+           (clojure.walk/postwalk
+            (fn [x]
+              (if-let [[t y] (:pod.babashka.aws/wrapped x)]
+                (case t
+                  :bytes (clojure.java.io/input-stream y))
+                x))
+            response)))))
+
 (def describe-map
   (walk/postwalk
    (fn [v]
@@ -64,25 +87,7 @@
                                       (println (-doc-str client op))))}
                     {:name "invoke"
                      :code
-                     (pr-str '(do (require (quote clojure.java.io) (quote clojure.walk))
-                                  (defn invoke [client op]
-                                    (let [op (clojure.walk/postwalk
-                                              (fn [x]
-                                                (if (instance? java.io.InputStream x)
-                                                  (let [os (java.io.ByteArrayOutputStream.)]
-                                                    (clojure.java.io/copy x os)
-                                                    (.toByteArray os))
-                                                  x))
-                                              op)
-                                          response (-invoke client op)]
-                                      (clojure.walk/postwalk
-                                       (fn [x]
-                                         (if-let [[t y] (:pod.babashka.aws/wrapped x)]
-                                           (case t
-                                             :bytes (clojure.java.io/input-stream y))
-                                           x))
-                                       response)))))})}]}))
-
+                     (pr-str invoke)})}]}))
 
 (defn read-transit [^String v]
   (transit/read
