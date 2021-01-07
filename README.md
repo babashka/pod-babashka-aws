@@ -59,7 +59,7 @@ See [test/script.clj](test/script.clj) for an example script.
 
 ## Differences with aws-cli
 
-- Credentials: custom flows are supported, but not by extending CredentialsProvider interface. See <a href="#credentials">Credentials</a>) for options.
+- Credentials: custom flows are supported, but not by extending CredentialsProvider interface. See <a href="#credentials">Credentials</a> for options.
 - This pod doesn't require adding dependencies for each AWS service.
 - Async might be added in a later version.
 - For uploading (big) files (e.g. to S3), it is better for memory consumption to
