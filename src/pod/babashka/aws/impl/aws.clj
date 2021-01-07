@@ -2,6 +2,7 @@
   (:require
    [clojure.edn]
    [clojure.java.io :as io]
+   [clojure.walk :as walk]
    [cognitect.aws.client.api :as aws]
    ;; these are dynamically loaded at runtime
    [cognitect.aws.http.cognitect]
@@ -61,4 +62,4 @@
     {:pod.babashka.aws/wrapped [:bytes (input-stream->byte-array x)]}))
 
 (defn -invoke [client op]
-  (clojure.walk/postwalk wrap-object (aws/invoke (get-client client) op)))
+  (walk/postwalk wrap-object (aws/invoke (get-client client) op)))
