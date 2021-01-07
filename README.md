@@ -28,7 +28,7 @@ Available namespaces and functions:
 
 (require '[babashka.pods :as pods])
 
-(pods/load-pod 'org.babashka/aws "0.0.2")
+(pods/load-pod 'org.babashka/aws "0.0.3")
 
 (require '[pod.babashka.aws :as aws])
 
