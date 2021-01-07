@@ -24,7 +24,7 @@ Available namespaces and functions:
 
 (require '[babashka.pods :as pods])
 
-(pods/load-pod 'org.babashka/aws "0.0.1")
+(pods/load-pod 'org.babashka/aws "0.0.2")
 
 (require '[pod.babashka.aws :as aws])
 
@@ -48,8 +48,7 @@ Available namespaces and functions:
             {:op :PutObject
              :request {:Bucket "pod-babashka-aws"
                        :Key "logo.png"
-                       :Body (io/input-stream
-                              (io/file "resources" "babashka.png"))}})
+                       :Body (io/file "resources" "babashka.png")}})
 ```
 
 See [test/script.clj](test/script.clj) for an example script.
@@ -59,7 +58,7 @@ See [test/script.clj](test/script.clj) for an example script.
 - Credentials: currently only `~/.aws/credentials` and environment variables are supported.
 - This pod doesn't require adding dependencies for each AWS service.
 - Async might be added in a later version.
-- For uploading big files (e.g. to S3), it is better for memory consumption to
+- For uploading (big) files (e.g. to S3), it is better for memory consumption to
   pass a `java.io.File` directly, rather than an input-stream.
 
 ## Build
