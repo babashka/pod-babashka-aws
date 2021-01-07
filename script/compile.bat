@@ -34,7 +34,7 @@ call %GRAALVM_HOME%\bin\native-image.cmd ^
   "--verbose" ^
   "--no-fallback" ^
   "--no-server" ^
-  "-J-Xmx3500m" ^
+  "-J-Xmx3g" ^
   "pod.babashka.aws"
 
 if %errorlevel% neq 0 exit /b %errorlevel%
