@@ -2,7 +2,7 @@
 
 A [babashka](https://github.com/babashka/babashka)
 [pod](https://github.com/babashka/pods) wrapping the
-[aws-cli](https://github.com/cognitect-labs/aws-api) library.
+[aws-api](https://github.com/cognitect-labs/aws-api) library.
 
 ## Status
 
@@ -57,7 +57,7 @@ Available namespaces and functions:
 
 See [test/script.clj](test/script.clj) for an example script.
 
-## Differences with aws-cli
+## Differences with aws-api
 
 - Credentials: custom flows are supported, but not by extending CredentialsProvider interface. See <a href="#credentials">Credentials</a> for options.
 - This pod doesn't require adding dependencies for each AWS service.
