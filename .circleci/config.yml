@@ -44,6 +44,7 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "deps.edn" }}
   linux:
+    resource_class: large # localstack needs more mem
     docker:
       - image: circleci/clojure:lein-2.9.3-buster
       - image: localstack/localstack
