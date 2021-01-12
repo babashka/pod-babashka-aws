@@ -188,6 +188,7 @@
                               "aws.profile"
                               "aws.accessKeyId"
                               "aws.secretKey"
+                              "aws.sessionToken"
                               "aws.region"
                               cognitect.aws.ec2-metadata-utils/ec2-metadata-service-override-system-property])
 
