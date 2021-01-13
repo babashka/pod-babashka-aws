@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.4
+
+- Bump deps (see `deps.edn`).
+- Add forwarding of `aws.sessionToken` system property [(@digash)](https://github.com/digash)
+
 ## v0.0.3
 
 - Add `pod.babashka.aws.credentials` namespace [(@jeroenvandijk)](https://github.com/jeroenvandijk)
