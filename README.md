@@ -116,6 +116,10 @@ The `credential_process` entry can be any program that prints the expected JSON 
 
 Run `script/compile`. This requires `GRAALVM_HOME` to be set.
 
+## Update aws-api deps
+
+Run `script/update-deps.clj`.
+
 ## Test
 
 Run `script/test`. This will run both the pod and tests (defined in

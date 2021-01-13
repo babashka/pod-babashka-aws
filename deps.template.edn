@@ -1,0 +1,20 @@
+;; NOTE: do not edit this directly. Edit deps.template.edn instead and run script/update-deps.edn.clj
+{:paths ["src" "resources"]
+ :aliases {:uberjar
+           {:replace-deps ; tool usage is new in 2.x
+            {seancorfield/depstar {:mvn/version "2.0.165"}}
+            :ns-default hf.depstar
+            :exec-fn uberjar
+            :exec-args {:jar pod-babashka-aws.jar
+                        :compile-ns [pod.babashka.aws]
+                        :aliases [:native]}}
+           :native {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
+                    :extra-deps {org.clojure/clojure {:mvn/version "1.10.2-rc1"}}}}
+ :deps {com.cognitect/transit-clj {:mvn/version "1.0.324"}
+        nrepl/bencode {:mvn/version "1.1.0"}
+        babashka/pods {:git/url "https://github.com/babashka/pods"
+                       :sha "22f200ef3006da90971e3bafa794985918b65fea"}
+        ;; from https://raw.githubusercontent.com/cognitect-labs/aws-api/master/latest-releases.edn
+        {{latest-releases.edn}}
+        }
+ }
