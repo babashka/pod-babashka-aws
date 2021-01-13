@@ -47,14 +47,18 @@
          #:aws{:access-key-id "key", :secret-access-key "secret"}))
 
   (with-system-properties {"aws.accessKeyId" "prop-key"
-                           "aws.secretKey" "prop-secret"}
+                           "aws.secretKey" "prop-secret"
+                           "aws.sessionToken" "prop-session-token"}
     (is (= (creds/fetch (creds/system-property-credentials-provider))
-           #:aws{:access-key-id "prop-key", :secret-access-key "prop-secret"})))
+           #:aws{:access-key-id "prop-key", :secret-access-key "prop-secret",
+                 :session-token "prop-session-token"})))
 
   (with-system-properties {"aws.accessKeyId" "default-prop-key"
-                           "aws.secretKey" "default-prop-secret"}
+                           "aws.secretKey" "default-prop-secret"
+                           "aws.sessionToken" "default-session-token"}
     (is (= (creds/fetch (creds/default-credentials-provider))
-           #:aws{:access-key-id "default-prop-key", :secret-access-key "default-prop-secret"})))
+           #:aws{:access-key-id "default-prop-key", :secret-access-key "default-prop-secret",
+                 :session-token "default-session-token"})))
 
   (is (= (creds/fetch (creds/basic-credentials-provider {:access-key-id "basic-key"
                                                           :secret-access-key "basic-secret"}))
