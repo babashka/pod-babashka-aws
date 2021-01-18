@@ -10,10 +10,11 @@
 
 (as-> (slurp "deps.template.edn") $
   (str/replace $ "{{latest-releases.edn}}"
-               (str/triml
-                (str/join "\n"
-                          (map (fn [[k v]]
-                                 (str "        " k " " v))
-                               latest-releases))))
+               (->> latest-releases
+                    (map (fn [[k v]]
+                           (str "        " k " " v)))
+                    sort
+                    (str/join "\n")
+                    str/triml))
   ;; (edn/read-string $)
   (spit "deps.edn" $))
