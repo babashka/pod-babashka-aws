@@ -15,6 +15,4 @@
         babashka/pods {:git/url "https://github.com/babashka/pods"
                        :sha "22f200ef3006da90971e3bafa794985918b65fea"}
         ;; from https://raw.githubusercontent.com/cognitect-labs/aws-api/master/latest-releases.edn
-        {{latest-releases.edn}}
-        }
- }
+        {{latest-releases.edn}}}}

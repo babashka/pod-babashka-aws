@@ -2,19 +2,40 @@
 
 (def latest-releases-url "https://raw.githubusercontent.com/cognitect-labs/aws-api/master/latest-releases.edn")
 
-(require '[clojure.edn :as edn])
+(require '[clojure.edn :as edn]
+         '[clojure.pprint :refer [cl-format]])
+
 (def latest-releases
   (edn/read-string (slurp latest-releases-url)))
 
-(require '[clojure.string :as str])
+(defn ^:private leftpad
+  "If S is shorter than LEN, pad it with CH on the left."
+  ([s len]
+   (leftpad s len " "))
+  ([s len ch]
+   (cl-format nil
+              (str "~" len ",'" ch "d")
+              (str s))))
 
-(as-> (slurp "deps.template.edn") $
-  (str/replace $ "{{latest-releases.edn}}"
-               (->> latest-releases
-                    (map (fn [[k v]]
-                           (str "        " k " " v)))
-                    sort
-                    (str/join "\n")
-                    str/triml))
-  ;; (edn/read-string $)
-  (spit "deps.edn" $))
+(let [edn-template (slurp "deps.template.edn")
+      deps-lines (->> latest-releases
+                      (map (fn [[k v]]
+                             (let [{:keys [aws/serviceFullName
+                                           mvn/version]} v]
+                               [k version serviceFullName]))))
+      max-column-size (->> deps-lines
+                           (map (fn [[k v n]]
+                                  (-> k str count)))
+                           (apply max))]
+  (as-> edn-template  $
+    (str/replace $ "{{latest-releases.edn}}"
+                 (->> (for [[api ver svc-name] (sort-by first deps-lines)
+                            :let [gap (- max-column-size (-> api str count))]]
+                        (format "        %s %s {:mvn/version \"%s\" :aws/serviceFullName \"%s\"}"
+                                api
+                                (leftpad " " gap)
+                                ver
+                                (if svc-name svc-name "")))
+                      (str/join "\n")
+                      str/triml))
+    (spit "deps.edn" $)))
