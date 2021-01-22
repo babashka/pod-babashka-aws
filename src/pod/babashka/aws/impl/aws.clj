@@ -51,6 +51,9 @@
   (wrap-object [x]))
 
 (extend-protocol IWrapObject
+  nil
+  (wrap-object [x] x)
+
   Object
   (wrap-object [x] x)
 
