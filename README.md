@@ -142,6 +142,8 @@ docker-compose up -d
 AWS_REGION=eu-north-1 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test script/test
 ```
 
+When adding new services to tests you need to add the service name into `SERVICES` environment variable in `docker-compose.yml` and `.circleci/config.yml`. See [localstack docs](https://github.com/localstack/localstack#configurations) for a list of available services.
+
 ## License
 
 Copyright © 2020 Michiel Borkent, Jeroen van Dijk, Rahul De and Valtteri Harmainen.

@@ -34,6 +34,11 @@
                      (when (localstack?)
                        {:endpoint-override localstack-endpoint}))))
 
+(def lambda (aws/client (merge
+                         {:api :lambda :region (or region "eu-central-1") }
+                         (when (localstack?)
+                           {:endpoint-override localstack-endpoint}))))
+
 (deftest aws-ops-test
   (is (contains? (aws/ops s3) :ListBuckets)))
 
@@ -93,7 +98,10 @@
                                    :request {:Bucket "pod-babashka-aws"
                                              :Key "logo.png"}})
               bytes (read-bytes (:Body get3))
-              _ (is (= (count png) (count bytes)))]
+              _ (is (= (count png) (count bytes)))
+
+              lambda-resp (aws/invoke lambda {:op :ListFunctions})
+              _ (is (= {:Functions []} lambda-resp))]
           :the-end))
     (println "Skipping credential test")))
 
