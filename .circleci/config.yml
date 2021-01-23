@@ -10,7 +10,7 @@ jobs:
       - image: circleci/clojure:lein-2.9.3-buster
       - image: localstack/localstack
         environment:
-          SERVICES: s3
+          SERVICES: s3,lambda
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
