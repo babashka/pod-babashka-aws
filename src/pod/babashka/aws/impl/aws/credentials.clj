@@ -66,7 +66,11 @@
    "echo '{\"AccessKeyId\":\"****\",\"SecretAccessKey\":\"***\",\"Version\":1}'"
    "echo 'foo bar'"]
 
-(defn parse-cmd [s]
+;(with-test
+(defn parse-cmd
+  "Split string to list of individual space separated arguments.
+  If argument contains space you can wrap it with `'` or `\"`."
+  [s]
   (loop [s (java.io.StringReader. s)
          in-double-quotes? false
          in-single-quotes? false
@@ -74,23 +78,28 @@
          parsed []]
     (let [c (.read s)]
       (cond
-        (= -1 c) parsed
+        (= -1 c) (if (pos? (count (str buf)))
+                   (conj parsed (str buf))
+                   parsed)
         (= 39 c) ;; single-quotes
         (if in-single-quotes?
-          ;; exit single-quoted string
+        ;; exit single-quoted string
           (recur s in-double-quotes? false (java.io.StringWriter.) (conj parsed (str buf)))
-          ;; enter single-quoted string
+        ;; enter single-quoted string
           (recur s in-double-quotes? true buf parsed))
+
         (= 92 c) ;; assume escaped quote
         (let [escaped (.read s)
               buf (doto buf (.write escaped))]
           (recur s in-double-quotes? in-single-quotes? buf parsed))
+
         (and (not in-single-quotes?) (= 34 c)) ;; double quote
         (if in-double-quotes?
-          ;; exit double-quoted string
+        ;; exit double-quoted string
           (recur s false in-single-quotes? (java.io.StringWriter.) (conj parsed (str buf)))
-          ;; enter double-quoted string
+        ;; enter double-quoted string
           (recur s true in-single-quotes? buf parsed))
+
         (and (not in-double-quotes?)
              (not in-single-quotes?)
              (Character/isWhitespace c))
@@ -101,6 +110,12 @@
         :else (do
                 (.write buf c)
                 (recur s in-double-quotes? in-single-quotes? buf parsed))))))
+                
+;  (is (= [] (split-arguments-string "")))
+;  (is (= ["hello"] (split-arguments-string "hello")))
+;  (is (= ["hello" "world"] (split-arguments-string "  hello   world ")))
+;  (is (= ["foo   bar" "a" "b" "c" "the d"] (split-arguments-string "\"foo   bar\"    a b c \"the d\"")))
+;  (is (= ["echo" "foo bar"] (split-arguments-string "echo 'foo bar'"))))
 
 (defn run-credential-process-cmd [cmd]
   (let [cmd (parse-cmd cmd)
