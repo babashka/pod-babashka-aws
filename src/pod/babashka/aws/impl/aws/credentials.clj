@@ -106,7 +106,7 @@
         (recur s in-double-quotes? in-single-quotes? (java.io.StringWriter.)
                (let [bs (str buf)]
                  (cond-> parsed
-                   (not (s/blank? bs)) (conj bs))))
+                   (not (str/blank? bs)) (conj bs))))
         :else (do
                 (.write buf c)
                 (recur s in-double-quotes? in-single-quotes? buf parsed))))))
