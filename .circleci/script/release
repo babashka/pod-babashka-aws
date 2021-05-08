@@ -7,9 +7,15 @@ VERSION=$(cat resources/POD_BABASHKA_AWS_VERSION)
 
 cd /tmp/release
 
+arch="amd64"
+
+if [ "$STATIC_COMPILE" = "true" ]; then
+    arch="$arch-static"
+fi
+
 ## release binary as zip archive
 
-zip "pod-babashka-aws-$VERSION-$APP_PLATFORM-amd64.zip" pod-babashka-aws
+zip "pod-babashka-aws-$VERSION-$APP_PLATFORM-$arch.zip" pod-babashka-aws
 
 ## cleanup
 

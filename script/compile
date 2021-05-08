@@ -11,18 +11,27 @@ clojure -X:native:uberjar
 
 "$GRAALVM_HOME/bin/gu" install native-image
 
-"$GRAALVM_HOME/bin/native-image" \
-    -cp "pod-babashka-aws.jar" \
-    -H:Name=pod-babashka-aws \
-    -H:+ReportExceptionStackTraces \
-    --initialize-at-build-time  \
-    -H:EnableURLProtocols=http,https,jar \
-    "--enable-all-security-services" \
-    --report-unsupported-elements-at-runtime \
-    "-H:ReflectionConfigurationFiles=reflection.json" \
-    "-H:ResourceConfigurationFiles=resources.json" \
-    --verbose \
-    --no-fallback \
-    --no-server \
-    "-J-Xmx3g" \
-    pod.babashka.aws
+args=(
+    "-cp" "pod-babashka-aws.jar"
+    "-H:Name=pod-babashka-aws"
+    "-H:+ReportExceptionStackTraces"
+    "--initialize-at-build-time"
+    "-H:EnableURLProtocols=http,https,jar"
+    "--enable-all-security-services"
+    "--report-unsupported-elements-at-runtime"
+    "-H:ReflectionConfigurationFiles=reflection.json"
+    "-H:ResourceConfigurationFiles=resources.json"
+    "--verbose"
+    "--no-fallback"
+    "--no-server"
+    "-J-Xmx3g"
+    "pod.babashka.aws"
+)
+
+STATIC_COMPILE="${STATIC_COMPILE:-}"
+
+if [ "$STATIC_COMPILE" = "true" ]; then
+    args+=("--static")
+fi
+
+"$GRAALVM_HOME/bin/native-image" "${args[@]}"
