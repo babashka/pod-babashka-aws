@@ -33,6 +33,7 @@ STATIC_COMPILE="${STATIC_COMPILE:-}"
 if [ "$STATIC_COMPILE" = "true" ]; then
     args+=("--static" "--libc=musl")
 
+    # needs to be in a separate script as we need sudo and >> redirects in it wont work.
     sudo bash script/setup-musl
 
     ZLIB_VERSION="1.2.11"
