@@ -16,7 +16,7 @@ tar xf "zlib-${ZLIB_VERSION}.tar.gz"
 cd "zlib-${ZLIB_VERSION}"
 CC=musl-gcc ./configure --static --prefix=/usr/lib/x86_64-linux-musl/
 make CC=musl-gcc
-make install
+sudo make install
 cd ..
 
 "$GRAALVM_HOME/bin/gu" install native-image
