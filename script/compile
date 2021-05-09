@@ -31,7 +31,23 @@ args=(
 STATIC_COMPILE="${STATIC_COMPILE:-}"
 
 if [ "$STATIC_COMPILE" = "true" ]; then
-    args+=("--static")
+    args+=("--static" "--libc=musl")
+
+    # needs to be in a separate script as we need sudo and >> redirects in it wont work.
+    sudo bash script/setup-musl
+
+    ZLIB_VERSION="1.2.11"
+
+    curl -O -sL "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz"
+    tar xf "zlib-${ZLIB_VERSION}.tar.gz"
+    cd "zlib-${ZLIB_VERSION}"
+    CC=musl-gcc ./configure --static --prefix=/usr/lib/x86_64-linux-musl/
+    make CC=musl-gcc
+    sudo make install
+    export CC=gcc
+    cd ..
+
+    sudo cp /usr/lib/x86_64-linux-musl/lib/libz.a /usr/lib/gcc/x86_64-linux-gnu/8/
 fi
 
 "$GRAALVM_HOME/bin/native-image" "${args[@]}"
