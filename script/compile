@@ -31,7 +31,7 @@ args=(
 STATIC_COMPILE="${STATIC_COMPILE:-}"
 
 if [ "$STATIC_COMPILE" = "true" ]; then
-    args+=("--static")
+    args+=("--static --libc=musl")
 fi
 
 "$GRAALVM_HOME/bin/native-image" "${args[@]}"
