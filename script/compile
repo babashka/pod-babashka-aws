@@ -12,7 +12,7 @@ clojure -X:native:uberjar
 git clone --depth=1 https://github.com/richfelker/musl-cross-make -b v0.9.9
 cd musl-cross-make
 cp config.mak.dist config.mak
-make -j"$(nproc)"
+make -j"$(nproc)" TARGET=x86_64-linux-musl
 make install
 ln -s output/bin/x86_64-linux-musl-gcc output/bin/musl-gcc
 export PATH=$PATH:~/musl-cross-make/output/bin
