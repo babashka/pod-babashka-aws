@@ -44,5 +44,5 @@ if [ "$STATIC_COMPILE" = "true" ]; then
     args+=("--static" "--libc=musl")
 fi
 
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/x86_64-linux-musl/lib/"
+cp /usr/lib/x86_64-linux-musl/lib/libz.a /usr/lib/x86_64-linux-gnu/
 "$GRAALVM_HOME/bin/native-image" "${args[@]}"
