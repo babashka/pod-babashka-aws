@@ -33,6 +33,8 @@ STATIC_COMPILE="${STATIC_COMPILE:-}"
 if [ "$STATIC_COMPILE" = "true" ]; then
     args+=("--static" "--libc=musl")
 
+    ./setup-musl
+
     ZLIB_VERSION="1.2.11"
 
     curl -O -sL "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz"

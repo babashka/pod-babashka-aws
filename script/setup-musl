@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+cat >> /etc/apt/sources.list <<eof
+deb http://ftp.us.debian.org/debian unstable main non-free contrib
+deb http://non-us.debian.org/debian-non-us unstable/non-us main contrib non-free
+eof
+
+cat >> /etc/apt/preferences <<eof
+Package: *
+Pin: release a=stable
+Pin-Priority: 700
+
+Package: *
+Pin: release a=testing
+Pin-Priority: 650
+
+Package: *
+pin: release a=unstable
+pin-priority: 600
+eof
+
+apt-get update && sudo apt-get install musl-tools/unstable
