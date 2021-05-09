@@ -9,21 +9,12 @@ fi
 
 clojure -X:native:uberjar
 
-git clone --depth=1 https://github.com/richfelker/musl-cross-make -b v0.9.9
-cd musl-cross-make
-cp config.mak.dist config.mak
-make -j"$(nproc)" TARGET=x86_64-linux-musl
-make install
-ln -s output/bin/x86_64-linux-musl-gcc output/bin/musl-gcc
-export PATH=$PATH:~/musl-cross-make/output/bin
-cd ..
-
 ZLIB_VERSION="1.2.11"
 
 wget "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz"
-tar xvf "zlib-${ZLIB_VERSION}.tar.gz"
+tar xf "zlib-${ZLIB_VERSION}.tar.gz"
 cd "zlib-${ZLIB_VERSION}"
-CC=musl-gcc ./configure --static --prefix=~/musl-cross-make/output/x86_64-linux-musl/
+CC=musl-gcc ./configure --static --prefix=/usr/lib/x86_64-linux-musl/
 make CC=musl-gcc
 make install
 cd ..
