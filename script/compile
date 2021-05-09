@@ -11,7 +11,7 @@ clojure -X:native:uberjar
 
 ZLIB_VERSION="1.2.11"
 
-wget "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz"
+curl -O -sL "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz"
 tar xf "zlib-${ZLIB_VERSION}.tar.gz"
 cd "zlib-${ZLIB_VERSION}"
 CC=musl-gcc ./configure --static --prefix=/usr/lib/x86_64-linux-musl/
