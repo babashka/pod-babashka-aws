@@ -44,5 +44,5 @@ if [ "$STATIC_COMPILE" = "true" ]; then
     args+=("--static" "--libc=musl")
 fi
 
-sudo cp /usr/lib/x86_64-linux-musl/lib/libz.a /usr/lib/x86_64-linux-gnu/
+sudo cp /usr/lib/x86_64-linux-musl/lib/libz.a /usr/lib/gcc/x86_64-linux-gnu/8/
 "$GRAALVM_HOME/bin/native-image" "${args[@]}"
