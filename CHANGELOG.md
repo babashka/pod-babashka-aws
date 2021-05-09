@@ -3,7 +3,7 @@
 ## v0.0.6
 
 - Bump deps (see `deps.edn`)
-- Provide static linux version linked against musl [@lispyclouds](https://github.com/lispyclouds), [@thiagokokada](https://github.com/thiagokokada)
+- Provide static linux version linked against musl ([@lispyclouds](https://github.com/lispyclouds), [@thiagokokada](https://github.com/thiagokokada))
 
 ## v0.0.4
 
