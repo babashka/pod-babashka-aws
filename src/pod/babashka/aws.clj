@@ -123,56 +123,77 @@
            (throw e)))
     (.toString baos "utf-8")))
 
+(def musl?
+  "Captured at compile time, to know if we are running inside a
+  statically compiled executable with musl."
+  (and (= "true" (System/getenv "BABASHKA_STATIC"))
+       (= "true" (System/getenv "BABASHKA_MUSL"))))
+
+(defmacro run [expr]
+  (if musl?
+    ;; When running in musl-compiled static executable we lift execution of bb
+    ;; inside a thread, so we have a larger than default stack size, set by an
+    ;; argument to the linker. See https://github.com/oracle/graal/issues/3398
+    `(let [v# (volatile! nil)
+           f# (fn []
+                (vreset! v# ~expr))]
+       (doto (Thread. nil f# "main")
+         (.start)
+         (.join))
+       @v#)
+    `(do ~expr)))
+
 (defn -main [& _args]
-  (loop []
-    (let [message (try (read stdin)
-                       (catch java.io.EOFException _
-                         ::EOF))]
-      (when-not (identical? ::EOF message)
-        (let [op (get message "op")
-              op (read-string op)
-              op (keyword op)
-              id (some-> (get message "id")
-                         read-string)
-              id (or id "unknown")]
-          (case op
-            :describe (do (write stdout describe-map)
+  (run
+    (loop []
+      (let [message (try (read stdin)
+                         (catch java.io.EOFException _
+                           ::EOF))]
+        (when-not (identical? ::EOF message)
+          (let [op (get message "op")
+                op (read-string op)
+                op (keyword op)
+                id (some-> (get message "id")
+                           read-string)
+                id (or id "unknown")]
+            (case op
+              :describe (do (write stdout describe-map)
+                            (recur))
+              :invoke (do (try
+                            (let [var (-> (get message "var")
+                                          read-string
+                                          symbol)
+                                  args (get message "args")
+                                  args (read-string args)
+                                  args (read-transit args)]
+                              (if-let [f (lookup var)]
+                                (let [out-str (java.io.StringWriter.)
+                                      value (binding [*out* out-str]
+                                              (let [v (apply f args)]
+                                                (write-transit v)))
+                                      out-str (str out-str)
+                                      reply (cond-> {"value" value
+                                                     "id" id
+                                                     "status" ["done"]}
+                                              (not (str/blank? out-str))
+                                              (assoc "out" out-str))]
+                                  (write stdout reply))
+                                (throw (ex-info (str "Var not found: " var) {}))))
+                            (catch Throwable e
+                              (debug e)
+                              (let [reply {"ex-message" (ex-message e)
+                                           "ex-data" (write-transit
+                                                      (assoc (ex-data e)
+                                                             :type (str (class e))))
+                                           "id" id
+                                           "status" ["done" "error"]}]
+                                (write stdout reply))))
                           (recur))
-            :invoke (do (try
-                          (let [var (-> (get message "var")
-                                        read-string
-                                        symbol)
-                                args (get message "args")
-                                args (read-string args)
-                                args (read-transit args)]
-                            (if-let [f (lookup var)]
-                              (let [out-str (java.io.StringWriter.)
-                                    value (binding [*out* out-str]
-                                            (let [v (apply f args)]
-                                              (write-transit v)))
-                                    out-str (str out-str)
-                                    reply (cond-> {"value" value
-                                                   "id" id
-                                                   "status" ["done"]}
-                                            (not (str/blank? out-str))
-                                            (assoc "out" out-str))]
-                                (write stdout reply))
-                              (throw (ex-info (str "Var not found: " var) {}))))
-                          (catch Throwable e
-                            (debug e)
-                            (let [reply {"ex-message" (ex-message e)
-                                         "ex-data" (write-transit
-                                                    (assoc (ex-data e)
-                                                           :type (str (class e))))
-                                         "id" id
-                                         "status" ["done" "error"]}]
-                              (write stdout reply))))
-                        (recur))
-            :shutdown (System/exit 0)
-            (do
-              (let [reply {"ex-message" "Unknown op"
-                           "ex-data" (pr-str {:op op})
-                           "id" id
-                           "status" ["done" "error"]}]
-                (write stdout reply))
-              (recur))))))))
+              :shutdown (System/exit 0)
+              (do
+                (let [reply {"ex-message" "Unknown op"
+                             "ex-data" (pr-str {:op op})
+                             "id" id
+                             "status" ["done" "error"]}]
+                  (write stdout reply))
+                (recur)))))))))
