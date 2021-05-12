@@ -125,7 +125,8 @@ jobs:
     environment:
       LEIN_ROOT: "true"
       GRAALVM_HOME: /home/circleci/graalvm-ce-java11-21.1.0
-      STATIC_COMPILE: "true"
+      BABASHKA_STATIC: "true"
+      BABASHKA_MUSL: "true"
       APP_PLATFORM: linux # used in release script
       APP_TEST_ENV: native
     steps:
@@ -148,6 +149,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get -y install g++
+            sudo -E script/setup-musl
       - run:
           name: Download GraalVM
           command: |
