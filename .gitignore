@@ -5,3 +5,5 @@ pom.xml
 classes
 /pod-babashka-aws
 /pod-babashka-aws.jar
+/.clj-kondo/.cache
+/.lsp/.cache

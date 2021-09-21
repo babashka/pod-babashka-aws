@@ -24,9 +24,9 @@ call %GRAALVM_HOME%\bin\native-image.cmd ^
   "-cp" "pod-babashka-aws.jar" ^
   "-H:Name=pod-babashka-aws" ^
   "-H:+ReportExceptionStackTraces" ^
-  "--initialize-at-build-time" ^
   "-H:EnableURLProtocols=jar" ^
   "--report-unsupported-elements-at-runtime" ^
+  "--initialize-at-build-time=org.eclipse.jetty" ^
   "-H:EnableURLProtocols=http,https,jar" ^
   "--enable-all-security-services" ^
   "-H:ReflectionConfigurationFiles=reflection.json" ^
