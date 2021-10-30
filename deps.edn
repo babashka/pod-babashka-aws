@@ -8,7 +8,8 @@
             :exec-args {:jar pod-babashka-aws.jar
                         :compile-ns [pod.babashka.aws]
                         :aliases [:native]}}
-           :native {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]
+           :native {:jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                               "-Djava.util.logging.config.file=logging.properties"]
                     :extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}
                                  com.github.clj-easy/graal-build-time {:mvn/version "0.1.3"}}}}
  :deps {com.cognitect/transit-clj {:mvn/version "1.0.324"}
