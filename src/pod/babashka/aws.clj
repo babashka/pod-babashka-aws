@@ -37,16 +37,27 @@
 (defn read [stream]
   (bencode/read-bencode stream))
 
+(defn string->stream
+  ([s] (string->stream s "UTF-8"))
+  ([^String s ^String encoding]
+   (-> s
+       (.getBytes encoding)
+       (java.io.ByteArrayInputStream.))))
+
+(defn set-logging-config! [s]
+  (let [s (.readConfiguration (java.util.logging.LogManager/getLogManager) (string->stream s))]
+    (.println System/err (str s))))
+
+;; (set-logging-config! "java.util.logging.ConsoleHandler.level = INFO\n")
+
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
-   'pod.babashka.aws.config
-   {'parse aws.config/parse}
-   'pod.babashka.aws
-   {'-client aws/-client
-    '-doc-str aws/-doc-str
-    '-invoke aws/-invoke
-    'ops aws/ops
-    }})
+   'pod.babashka.aws.config {'parse aws.config/parse}
+   'pod.babashka.aws {'-client aws/-client
+                      '-doc-str aws/-doc-str
+                      '-invoke aws/-invoke
+                      'ops aws/ops
+                      'set-logging-config! set-logging-config!}})
 
 (defn lookup [var]
   (let [var-ns (symbol (namespace var))
