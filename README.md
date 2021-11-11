@@ -145,8 +145,8 @@ INFO: Unable to fetch credentials from environment variables.
 Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
 INFO: Unable to fetch credentials from system properties.
 (:UserId :Account :Arn)
-;; The sts-1 client still has level WARNING.
 
+;; The sts-1 client still has level WARNING:
 user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
 (:UserId :Account :Arn)
 ```
