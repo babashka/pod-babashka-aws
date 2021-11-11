@@ -15,7 +15,7 @@ The namespaces and functions in this pod reflect those in the official
 
 Available namespaces and functions:
 
-- `pod.babashka.aws`: `client`, `doc`, `invoke`
+- `pod.babashka.aws`: `client`, `doc`, `invoke`, `set-jul-level!`
 - `pod.babashka.aws.config`: `parse`
 - `pod.babashka.aws.credentials`: `credential-process-credentials-provider`,
   `basic-credentials-provider`, `default-credentials-provider`,
@@ -111,6 +111,43 @@ The `credential_process` entry can be any program that prints the expected JSON 
 
 (println "{\"AccessKeyId\":\"***\",\"SecretAccessKey\":\"***\",\"SessionToken\":\"***\",\"Expiration\":\"2020-01-00T00:00:00Z\",\"Version\":1}")
 ```
+
+## Logging
+
+The aws-api includes clojure.tools.logging using the default
+java.util.logging implementation. Use `set-jul-level!` to change the
+level of logging in the pod. The default log level in the pod is
+`WARNING`.
+
+Each aws-api client has it's own logger which adopts the logging level
+of the global Logger at time it was instantiated.
+
+```clojure
+user=> (def sts-1 (aws/client {:api :sts}))
+2021-11-10 23:07:13.608:INFO::main: Logging initialized @30234ms to org.eclipse.jetty.util.log.StdErrLog
+#'user/sts-1
+user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
+(:UserId :Account :Arn)
+user=> (aws/set-jul-level! "ALL")
+nil
+user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
+(:UserId :Account :Arn)
+user=> (def sts-2 (aws/client {:api :sts}))
+#'user/sts-2
+;; The sts-2 client
+user=> (keys (aws/invoke sts-2 {:op :GetCallerIdentity}))
+Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
+INFO: Unable to fetch credentials from environment variables.
+Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
+INFO: Unable to fetch credentials from system properties.
+(:UserId :Account :Arn)
+;; The sts-1 client still has level WARNING.
+user=>  (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
+(:UserId :Account :Arn)
+```
+
+Valid logging levels are the names of the java.util.logging.Level
+enumerated values.
 
 ## Build
 

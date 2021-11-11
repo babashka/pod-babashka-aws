@@ -37,6 +37,24 @@
 (defn read [stream]
   (bencode/read-bencode stream))
 
+(defn set-jul-level!
+  "Sets the log level of a java.util.logging Logger.
+
+  Sets a java.util.logging Logger to the java.util.logging.Level with
+  the name `level`.
+
+  Sets the level of the Logger with name `logger-name` if
+  given. Otherwise sets the level of the global Logger."
+  ([level]
+   (set-jul-level! "" level))
+  ([logger-name level]
+   (some-> (.getLogger (java.util.logging.LogManager/getLogManager) logger-name)
+           (.setLevel (java.util.logging.Level/parse level)))))
+
+;; Change default level from INFO to WARNING to silence "INFO: Unable to fetch credentials"
+;; in cognitect.aws.credentials/valid-credentials
+(set-jul-level! "WARNING")
+
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
    'pod.babashka.aws.config
@@ -46,7 +64,7 @@
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
     'ops aws/ops
-    }})
+    'set-jul-level! set-jul-level!}})
 
 (defn lookup [var]
   (let [var-ns (symbol (namespace var))
