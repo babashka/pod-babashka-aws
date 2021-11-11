@@ -45,7 +45,7 @@ build_script:
 
     powershell -Command "if (Test-Path('graalvm')) { return } else { Expand-Archive graalvm.zip graalvm }"
 
-    powershell -Command "if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/borkdude/babashka/releases/download/v0.2.5/babashka-0.2.5-windows-amd64.zip', 'bb.zip') }"
+    powershell -Command "if (Test-Path('bb.exe')) { return } else { (New-Object Net.WebClient).DownloadFile('https://github.com/babashka/babashka/releases/download/v0.6.4/babashka-0.6.4-windows-amd64.zip', 'bb.zip') }"
 
     powershell -Command "if (Test-Path('bb.exe')) { return } else { Expand-Archive bb.zip . }"
 
