@@ -8,7 +8,8 @@
             [cognitect.aws.config :as aws.config]
             [cognitect.transit :as transit]
             [pod.babashka.aws.impl.aws :as aws]
-            [pod.babashka.aws.impl.aws.credentials :as credentials])
+            [pod.babashka.aws.impl.aws.credentials :as credentials]
+            [pod.babashka.aws.logging :as logging])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -37,6 +38,8 @@
 (defn read [stream]
   (bencode/read-bencode stream))
 
+(logging/set-level! :warn)
+
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
    'pod.babashka.aws.config
@@ -45,8 +48,9 @@
    {'-client aws/-client
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
-    'ops aws/ops
-    }})
+    'ops aws/ops}
+   'pod.babashka.aws.logging
+   {'set-level! logging/set-level!}})
 
 (defn lookup [var]
   (let [var-ns (symbol (namespace var))
@@ -106,7 +110,11 @@
                                       (println (-doc-str client op))))}
                     {:name "invoke"
                      :code
-                     (pr-str invoke)})}]}))
+                     (pr-str invoke)})}
+      {:name pod.babashka.aws.logging
+       :vars ~(mapv (fn [[k _]]
+                      {:name k})
+                    (get lookup* 'pod.babashka.aws.logging))}]}))
 
 (defn read-transit [^String v]
   (transit/read

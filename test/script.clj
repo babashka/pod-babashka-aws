@@ -118,6 +118,16 @@
       (is (= service (do (aws/client {:api service})
                          service))))))
 
+(require '[pod.babashka.aws.logging :as logging])
+
+(deftest logging-test
+  (logging/set-level! :info)
+  (let [s3 (aws/client (merge
+                        {:api :s3 :region (or region "eu-central-1") }
+                        (when (localstack?)
+                          {:endpoint-override localstack-endpoint})))]
+    (aws/invoke s3 {:op :ListBuckets})))
+
 (when-not (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (shutdown-agents))
 
