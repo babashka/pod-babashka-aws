@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.0
+
+- Bump deps (see `deps.edn`)
+- Add `pod.babashka.logging` namespace with `set-level!` function. See [docs](https://github.com/babashka/pod-babashka-aws#logging). [#41](https://github.com/babashka/pod-babashka-aws/issues/41)
+- Fix transit serialization of `Throwable` and `Class` in `:Error` payload.
+
 ## v0.0.6
 
 - Bump deps (see `deps.edn`)
@@ -8,11 +14,11 @@
 ## v0.0.4
 
 - Bump deps (see `deps.edn`)
-- Add forwarding of `aws.sessionToken` system property [(@digash)](https://github.com/digash)
+- Add forwarding of `aws.sessionToken` system property ([@digash](https://github.com/digash))
 
 ## v0.0.3
 
-- Add `pod.babashka.aws.credentials` namespace [(@jeroenvandijk)](https://github.com/jeroenvandijk)
+- Add `pod.babashka.aws.credentials` namespace ([@jeroenvandijk](https://github.com/jeroenvandijk))
 
 ## v0.0.2
 
