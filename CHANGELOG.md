@@ -4,7 +4,7 @@
 
 - Bump deps (see `deps.edn`)
 - Add `pod.babashka.logging` namespace with `set-level!` function. See [docs](https://github.com/babashka/pod-babashka-aws#logging). [#41](https://github.com/babashka/pod-babashka-aws/issues/41)
-- Fix transit serialization of `Throwable` and `Class` in `:Error` payload.
+- Fix transit serialization of `Throwable` and `Class` in `:Error` payload. [#30](https://github.com/babashka/pod-babashka-aws/issues/30)
 
 ## v0.0.6
 
