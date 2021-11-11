@@ -14,6 +14,6 @@
  :deps {com.cognitect/transit-clj {:mvn/version "1.0.324"}
         nrepl/bencode {:mvn/version "1.1.0"}
         babashka/pods {:git/url "https://github.com/babashka/pods"
-                       :sha "22f200ef3006da90971e3bafa794985918b65fea"}
+                       :sha "f360afa6135b8bd2d384d9ba4582c0de6fdac804"}
         ;; from https://raw.githubusercontent.com/cognitect-labs/aws-api/master/latest-releases.edn
         {{latest-releases.edn}}}}

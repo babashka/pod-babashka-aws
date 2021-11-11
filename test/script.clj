@@ -54,21 +54,22 @@
            (System/getenv "AWS_SECRET_ACCESS_KEY")
            region)
     (do (is (= (keys (aws/invoke s3 {:op :ListBuckets})) [:Buckets :Owner]))
-        (let [png (java.nio.file.Files/readAllBytes
+        (let [bucket-name (str "pod-bb-aws-test-" (java.util.UUID/randomUUID))
+              png (java.nio.file.Files/readAllBytes
                    (.toPath (io/file "resources" "babashka.png")))
               ;; ensure bucket, ignore error if it already exists
               _bucket-resp (aws/invoke
                             s3
                             {:op :CreateBucket
-                             :request {:Bucket "pod-babashka-aws"
+                             :request {:Bucket bucket-name
                                        :CreateBucketConfiguration {:LocationConstraint region}}})
               put1 (aws/invoke s3 {:op :PutObject
-                                   :request {:Bucket "pod-babashka-aws"
+                                   :request {:Bucket bucket-name
                                              :Key "logo.png"
                                              :Body png}})
               _ (is (not (:Error put1)))
               get1 (aws/invoke s3 {:op :GetObject
-                                   :request {:Bucket "pod-babashka-aws"
+                                   :request {:Bucket bucket-name
                                              :Key "logo.png"}})
               read-bytes (fn [is]
                            (let [baos (java.io.ByteArrayOutputStream.)]
@@ -78,30 +79,34 @@
               _ (is (= (count png) (count bytes)))
               put2 (testing "inputstream arg"
                      (aws/invoke s3 {:op :PutObject
-                                     :request {:Bucket "pod-babashka-aws"
+                                     :request {:Bucket bucket-name
                                                :Key "logo.png"
                                                :Body (io/input-stream
                                                       (io/file "resources" "babashka.png"))}}))
               _ (is (not (:Error put2)))
               get2 (aws/invoke s3 {:op :GetObject
-                                   :request {:Bucket "pod-babashka-aws"
+                                   :request {:Bucket bucket-name
                                              :Key "logo.png"}})
               bytes (read-bytes (:Body get2))
               _ (is (= (count png) (count bytes)))
               put3 (testing "file arg"
                      (aws/invoke s3 {:op :PutObject
-                                     :request {:Bucket "pod-babashka-aws"
+                                     :request {:Bucket bucket-name
                                                :Key "logo.png"
                                                :Body (io/file "resources" "babashka.png")}}))
               _ (is (not (:Error put3)))
               get3 (aws/invoke s3 {:op :GetObject
-                                   :request {:Bucket "pod-babashka-aws"
+                                   :request {:Bucket bucket-name
                                              :Key "logo.png"}})
               bytes (read-bytes (:Body get3))
               _ (is (= (count png) (count bytes)))
-
               lambda-resp (aws/invoke lambda {:op :ListFunctions})
-              _ (is (= {:Functions []} lambda-resp))]
+              _ (is (:Functions lambda-resp))
+              _ (is (not (:Error (aws/invoke s3 {:op :DeleteObject
+                                                 :request {:Bucket bucket-name
+                                                           :Key "logo.png"}}))))
+              _ (is (not (:Error (aws/invoke s3 {:op :DeleteBucket
+                                                 :request {:Bucket bucket-name}}))))]
           :the-end))
     (println "Skipping credential test")))
 
@@ -126,7 +131,17 @@
                         {:api :s3 :region (or region "eu-central-1") }
                         (when (localstack?)
                           {:endpoint-override localstack-endpoint})))]
-    (aws/invoke s3 {:op :ListBuckets})))
+    (aws/invoke s3 {:op :ListBuckets}))
+  (logging/set-level! :warn))
+
+(deftest throwable-test
+  (let [s3 (aws/client (merge
+                        {:api :s3}
+                        (when (localstack?)
+                          {:endpoint-override localstack-endpoint})))]
+    (is (aws/invoke s3 {:op :GetObject
+                        :request {:Bucket "pod-babashka-aws"
+                                  :Key "logo.png"}}))))
 
 (when-not (= "executable" (System/getProperty "org.graalvm.nativeimage.kind"))
   (shutdown-agents))

@@ -80,6 +80,49 @@
                 x))
             response)))))
 
+(def throwable-key (str `throwable))
+
+(def throwable-write-handler
+  (transit/write-handler throwable-key Throwable->map))
+
+(def class-key (str `class))
+
+(def class-write-handler
+  (transit/write-handler class-key (fn [^Class x] (.getName x))))
+
+(def transit-writers-map
+  {java.lang.Throwable throwable-write-handler
+   java.lang.Class class-write-handler})
+
+(def whm (transit/write-handler-map transit-writers-map))
+
+(defn write-transit [v]
+  (let [baos (java.io.ByteArrayOutputStream.)]
+    (try (transit/write (transit/writer baos :json {:handlers whm}) v)
+         (catch Exception e
+           (binding [*out* *err*]
+             (prn "ERROR: can't serialize to transit:" v))
+           (throw e)))
+    (.toString baos "utf-8")))
+
+(defn read-transit [^String v]
+  (transit/read
+   (transit/reader
+    (java.io.ByteArrayInputStream. (.getBytes v "utf-8"))
+    :json)))
+
+(def reg-transit-handlers
+  (format "
+(require 'babashka.pods)
+(babashka.pods/add-transit-read-handler!
+    \"%s\"
+    identity)
+
+(babashka.pods/add-transit-read-handler!
+    \"%s\"
+    (fn [s] {:class (symbol s)}))"
+          throwable-key class-key))
+
 (def describe-map
   (walk/postwalk
    (fn [v]
@@ -110,26 +153,13 @@
                                       (println (-doc-str client op))))}
                     {:name "invoke"
                      :code
-                     (pr-str invoke)})}
+                     (pr-str invoke)}
+                    {:name "-reg-transit-handlers"
+                     :code reg-transit-handlers})}
       {:name pod.babashka.aws.logging
        :vars ~(mapv (fn [[k _]]
                       {:name k})
                     (get lookup* 'pod.babashka.aws.logging))}]}))
-
-(defn read-transit [^String v]
-  (transit/read
-   (transit/reader
-    (java.io.ByteArrayInputStream. (.getBytes v "utf-8"))
-    :json)))
-
-(defn write-transit [v]
-  (let [baos (java.io.ByteArrayOutputStream.)]
-    (try (transit/write (transit/writer baos :json) v)
-         (catch Exception e
-           (binding [*out* *err*]
-             (prn "ERROR: can't serialize to transit:" v))
-           (throw e)))
-    (.toString baos "utf-8")))
 
 (def musl?
   "Captured at compile time, to know if we are running inside a
