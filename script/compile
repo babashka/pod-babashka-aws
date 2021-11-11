@@ -7,7 +7,7 @@ if [ -z "$GRAALVM_HOME" ]; then
     exit 1
 fi
 
-clojure -X:native:uberjar
+clojure -T:build uber
 
 "$GRAALVM_HOME/bin/gu" install native-image
 
