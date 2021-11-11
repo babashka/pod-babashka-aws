@@ -8,7 +8,8 @@
             [cognitect.aws.config :as aws.config]
             [cognitect.transit :as transit]
             [pod.babashka.aws.impl.aws :as aws]
-            [pod.babashka.aws.impl.aws.credentials :as credentials])
+            [pod.babashka.aws.impl.aws.credentials :as credentials]
+            [pod.babashka.aws.logging :as logging])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -37,23 +38,13 @@
 (defn read [stream]
   (bencode/read-bencode stream))
 
-(defn set-jul-level!
-  "Sets the log level of a java.util.logging Logger.
+(logging/set-level! :warn)
 
-  Sets a java.util.logging Logger to the java.util.logging.Level with
-  the name `level`.
+(defn string->stream [^String s]
+  (-> s .getBytes (java.io.ByteArrayInputStream.)))
 
-  Sets the level of the Logger with name `logger-name` if
-  given. Otherwise sets the level of the global Logger."
-  ([level]
-   (set-jul-level! "" level))
-  ([logger-name level]
-   (some-> (.getLogger (java.util.logging.LogManager/getLogManager) logger-name)
-           (.setLevel (java.util.logging.Level/parse level)))))
-
-;; Change default level from INFO to WARNING to silence "INFO: Unable to fetch credentials"
-;; in cognitect.aws.credentials/valid-credentials
-(set-jul-level! "WARNING")
+(defn set-java-util-logging-config-file! [f]
+  (.readConfiguration (java.util.logging.LogManager/getLogManager) (string->stream (slurp f))))
 
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
@@ -63,8 +54,9 @@
    {'-client aws/-client
     '-doc-str aws/-doc-str
     '-invoke aws/-invoke
-    'ops aws/ops
-    'set-jul-level! set-jul-level!}})
+    'ops aws/ops}
+   'pod.babashka.aws.logging
+   {'set-level! logging/set-level!}})
 
 (defn lookup [var]
   (let [var-ns (symbol (namespace var))
@@ -124,7 +116,11 @@
                                       (println (-doc-str client op))))}
                     {:name "invoke"
                      :code
-                     (pr-str invoke)})}]}))
+                     (pr-str invoke)})}
+      {:name pod.babashka.aws.logging
+       :vars ~(mapv (fn [[k _]]
+                      {:name k})
+                    (get lookup* 'pod.babashka.aws.logging))}]}))
 
 (defn read-transit [^String v]
   (transit/read

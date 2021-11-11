@@ -114,24 +114,27 @@ The `credential_process` entry can be any program that prints the expected JSON 
 
 ## Logging
 
-The aws-api includes clojure.tools.logging using the default
-java.util.logging implementation. Use `set-jul-level!` to change the
-level of logging in the pod. The default log level in the pod is
-`WARNING`.
+The aws-api includes clojure.tools.logging using the default java.util.logging
+implementation. Use `pod.babashka.aws.logging/set-level!` to change the level of
+logging in the pod. The default log level in the pod is `:warn`. All possible
+levels: `:trace`, `:debug`, `:info`, `:warn`, `:error` or `:fatal`.
 
 Each aws-api client has it's own logger which adopts the logging level
-of the global Logger at time it was instantiated.
+of the global logger at time it was instantiated.
 
 ```clojure
 user=> (def sts-1 (aws/client {:api :sts}))
 2021-11-10 23:07:13.608:INFO::main: Logging initialized @30234ms to org.eclipse.jetty.util.log.StdErrLog
 #'user/sts-1
+
 user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
 (:UserId :Account :Arn)
-user=> (aws/set-jul-level! "ALL")
+
+user=> (require '[pod.babashka.aws.logging :as logging])
 nil
-user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
-(:UserId :Account :Arn)
+
+user=> (logging/set-level! :info)
+nil
 user=> (def sts-2 (aws/client {:api :sts}))
 #'user/sts-2
 ;; The sts-2 client
@@ -142,12 +145,9 @@ Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
 INFO: Unable to fetch credentials from system properties.
 (:UserId :Account :Arn)
 ;; The sts-1 client still has level WARNING.
-user=>  (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
+user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
 (:UserId :Account :Arn)
 ```
-
-Valid logging levels are the names of the java.util.logging.Level
-enumerated values.
 
 ## Build
 
