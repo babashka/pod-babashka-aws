@@ -18,6 +18,7 @@ args=(
     "-H:EnableURLProtocols=http,https,jar"
     "--enable-all-security-services"
     "--report-unsupported-elements-at-runtime"
+    "--initialize-at-build-time=com.cognitect.transit"
     "--initialize-at-build-time=org.eclipse.jetty"
     "-H:ReflectionConfigurationFiles=reflection.json"
     "-H:ResourceConfigurationFiles=resources.json"

@@ -27,6 +27,7 @@ call %GRAALVM_HOME%\bin\native-image.cmd ^
   "-H:EnableURLProtocols=jar" ^
   "--report-unsupported-elements-at-runtime" ^
   "--initialize-at-build-time=org.eclipse.jetty" ^
+  "--initialize-at-build-time=com.cognitect.transit" ^
   "-H:EnableURLProtocols=http,https,jar" ^
   "--enable-all-security-services" ^
   "-H:ReflectionConfigurationFiles=reflection.json" ^
