@@ -40,12 +40,6 @@
 
 (logging/set-level! :warn)
 
-(defn string->stream [^String s]
-  (-> s .getBytes (java.io.ByteArrayInputStream.)))
-
-(defn set-java-util-logging-config-file! [f]
-  (.readConfiguration (java.util.logging.LogManager/getLogManager) (string->stream (slurp f))))
-
 (def lookup*
   {'pod.babashka.aws.credentials credentials/lookup-map
    'pod.babashka.aws.config

@@ -138,7 +138,7 @@ user=> (logging/set-level! :info)
 nil
 user=> (def sts-2 (aws/client {:api :sts}))
 #'user/sts-2
-;; The sts-2 client
+
 user=> (keys (aws/invoke sts-2 {:op :GetCallerIdentity}))
 Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
 INFO: Unable to fetch credentials from environment variables.
@@ -146,6 +146,7 @@ Nov 10, 2021 11:07:45 PM clojure.tools.logging$eval9973$fn__9976 invoke
 INFO: Unable to fetch credentials from system properties.
 (:UserId :Account :Arn)
 ;; The sts-1 client still has level WARNING.
+
 user=> (keys (aws/invoke sts-1 {:op :GetCallerIdentity}))
 (:UserId :Account :Arn)
 ```
