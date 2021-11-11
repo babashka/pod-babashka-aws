@@ -7,7 +7,7 @@ jobs:
   jvm:
     docker:
       # specify the version you desire here
-      - image: circleci/clojure:lein-2.9.3-buster
+      - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
       - image: localstack/localstack
         environment:
           SERVICES: s3,lambda
@@ -46,7 +46,7 @@ jobs:
   linux:
     resource_class: large # localstack needs more mem
     docker:
-      - image: circleci/clojure:lein-2.9.1
+      - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
       - image: localstack/localstack
         environment:
           SERVICES: s3
@@ -117,7 +117,7 @@ jobs:
   linux-static:
     resource_class: large # localstack needs more mem
     docker:
-      - image: circleci/clojure:lein-2.9.1
+      - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
       - image: localstack/localstack
         environment:
           SERVICES: s3
@@ -245,7 +245,7 @@ jobs:
           destination: release
   deploy:
     docker:
-      - image: circleci/clojure:lein-2.9.3-buster
+      - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
     working_directory: ~/repo
     environment:
       LEIN_ROOT: "true"
