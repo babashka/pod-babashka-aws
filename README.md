@@ -15,11 +15,12 @@ The namespaces and functions in this pod reflect those in the official
 
 Available namespaces and functions:
 
-- `pod.babashka.aws`: `client`, `doc`, `invoke`, `set-jul-level!`
+- `pod.babashka.aws`: `client`, `doc`, `invoke`
 - `pod.babashka.aws.config`: `parse`
 - `pod.babashka.aws.credentials`: `credential-process-credentials-provider`,
   `basic-credentials-provider`, `default-credentials-provider`,
   `fetch`, `profile-credentials-provider`, `system-property-credentials-provider`
+- `pod.babashka.aws.logging`: `set-level!`
 
 ## Example
 
