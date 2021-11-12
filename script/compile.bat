@@ -16,12 +16,12 @@ echo Please set GRAALVM_HOME
 exit /b
 )
 
-bb clojure -J-Dclojure.main.report=stderr -T:build uber
+bb clojure -J-Dclojure.main.report=stderr -T:build build
 
 call %GRAALVM_HOME%\bin\gu.cmd install native-image
 
 call %GRAALVM_HOME%\bin\native-image.cmd ^
-  "-cp" "pod-babashka-aws.jar" ^
+  "-cp" "target/classes" ^
   "-H:Name=pod-babashka-aws" ^
   "-H:+ReportExceptionStackTraces" ^
   "-H:EnableURLProtocols=jar" ^
