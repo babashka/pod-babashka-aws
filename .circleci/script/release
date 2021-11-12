@@ -9,7 +9,7 @@ cd /tmp/release
 
 arch="amd64"
 
-if [ "$STATIC_COMPILE" = "true" ]; then
+if [ "$BABASHKA_STATIC" = "true" ]; then
     arch="$arch-static"
 fi
 
