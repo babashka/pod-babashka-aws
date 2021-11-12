@@ -21,7 +21,7 @@ bb clojure -J-Dclojure.main.report=stderr -T:build uber
 call %GRAALVM_HOME%\bin\gu.cmd install native-image
 
 call %GRAALVM_HOME%\bin\native-image.cmd ^
-  "-cp" "pod-babashka-aws.jar" ^
+  "-cp" "target/pod-babashka-aws.jar" ^
   "-H:Name=pod-babashka-aws" ^
   "-H:+ReportExceptionStackTraces" ^
   "-H:EnableURLProtocols=jar" ^

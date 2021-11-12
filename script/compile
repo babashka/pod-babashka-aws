@@ -12,7 +12,7 @@ clojure -T:build uber
 "$GRAALVM_HOME/bin/gu" install native-image
 
 args=(
-    "-cp" "pod-babashka-aws.jar"
+    "-cp" "target/pod-babashka-aws.jar"
     "-H:Name=pod-babashka-aws"
     "-H:+ReportExceptionStackTraces"
     "-H:EnableURLProtocols=http,https,jar"
