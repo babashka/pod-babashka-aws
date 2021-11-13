@@ -1,3 +1,6 @@
+;; see https://ask.clojure.org/index.php/10905/control-transient-deps-that-compiled-assembled-into-uberjar?show=10913#c10913
+(require 'clojure.tools.deps.alpha.util.s3-transporter)
+
 (ns build
   (:require [clojure.string :as str]
             [clojure.tools.build.api :as b]))
@@ -5,30 +8,21 @@
 (def lib 'pod-babashka-aws)
 (def version (str/trim (slurp "resources/POD_BABASHKA_AWS_VERSION")))
 (def class-dir "target/classes")
-
 (def basis (b/create-basis {:project "deps.edn" :aliases [:native]}))
-(def basis-unpacked (b/create-basis {:project "deps.edn" :aliases [:unpacked :native]}))
+(def uber-file "target/pod-babashka-aws.jar")
 
 (defn clean [_]
   (b/delete {:path "target"}))
 
-(defn unzip [{:keys [basis verbose]}]
-  (let [entries (-> basis :classpath keys)]
-    (doseq [entry entries]
-      (if (str/ends-with? entry ".jar")
-        (do (when verbose (println "Unzipping" entry))
-            (b/unzip {:zip-file entry
-                      :target-dir class-dir}))
-        (do
-          (when verbose (println "Copying dir" entry))
-          (b/copy-dir {:target-dir class-dir
-                       :src-dirs [entry]}))))))
-
-(defn build [_]
+(defn uber [_]
   (clean nil)
-  (unzip {:basis basis})
-  (b/compile-clj {:basis basis-unpacked
-                  :ns-compile '[pod.babashka.aws]
+  (b/copy-dir {:src-dirs ["src" "resources"]
+               :target-dir class-dir})
+  (b/compile-clj {:basis basis
                   :src-dirs ["src"]
+                  :ns-compile '[pod.babashka.aws]
                   :class-dir class-dir
-                  :compile-opts {:direct-linking true}}))
+                  :compile-opts {:direct-linking true}})
+  (b/uber {:class-dir class-dir
+           :uber-file uber-file
+           :basis basis}))

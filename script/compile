@@ -7,12 +7,12 @@ if [ -z "$GRAALVM_HOME" ]; then
     exit 1
 fi
 
-clojure -T:build build
+clojure -T:build uber
 
 "$GRAALVM_HOME/bin/gu" install native-image
 
 args=(
-    "-cp" "target/classes"
+    "-cp" "target/pod-babashka-aws.jar"
     "-H:Name=pod-babashka-aws"
     "-H:+ReportExceptionStackTraces"
     "-H:EnableURLProtocols=http,https,jar"
