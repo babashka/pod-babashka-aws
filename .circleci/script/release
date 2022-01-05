@@ -7,7 +7,7 @@ VERSION=$(cat resources/POD_BABASHKA_AWS_VERSION)
 
 cd /tmp/release
 
-arch=${APP_ARCH:-amd64}
+arch="amd64"
 
 if [ "$BABASHKA_STATIC" = "true" ]; then
     arch="$arch-static"
