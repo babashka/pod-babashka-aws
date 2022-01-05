@@ -43,77 +43,77 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "deps.edn" }}
-  # linux:
-  #   resource_class: large # localstack needs more mem
-  #   docker:
-  #     - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
-  #     - image: localstack/localstack
-  #       environment:
-  #         SERVICES: s3
-  #   working_directory: ~/repo
-  #   environment:
-  #     LEIN_ROOT: "true"
-  #     GRAALVM_HOME: /home/circleci/graalvm-ce-java11-21.3.0
-  #     APP_PLATFORM: linux # used in release script
-  #     APP_TEST_ENV: native
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Get rid of erroneous git config
-  #         command: |
-  #             rm -rf /home/circleci/.gitconfig
-  #     - restore_cache:
-  #         keys:
-  #           - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
-  #     - run:
-  #         name: Install Clojure
-  #         command: |
-  #           wget https://download.clojure.org/install/linux-install-1.10.3.1020.sh
-  #           chmod +x linux-install-1.10.3.1020.sh
-  #           sudo ./linux-install-1.10.3.1020.sh
-  #     - run:
-  #         name: Install native dev tools
-  #         command: |
-  #           sudo apt-get update
-  #           sudo apt-get -y install gcc g++ zlib1g-dev
-  #     - run:
-  #         name: Download GraalVM
-  #         command: |
-  #           cd ~
-  #           if ! [ -d graalvm-ce-java11-21.3.0 ]; then
-  #             curl -O -sL https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-amd64-21.3.0.tar.gz
-  #             tar xzf graalvm-ce-java11-linux-amd64-21.3.0.tar.gz
-  #           fi
-  #     - run:
-  #         name: Build binary
-  #         command: |
-  #           script/compile
-  #         no_output_timeout: 30m
-  #     - run:
-  #         name: Install bb for test
-  #         command: |
-  #           mkdir bb
-  #           bash <(curl -sL https://raw.githubusercontent.com/borkdude/babashka/master/install) \
-  #             --dir bb --download-dir bb
-  #     - run:
-  #         name: Run test
-  #         environment:
-  #           AWS_ACCESS_KEY_ID: test
-  #           AWS_SECRET_ACCESS_KEY: test
-  #           AWS_REGION: eu-west-1
-  #         command: PATH=$PATH:bb script/test
-  #     - run:
-  #         name: Release
-  #         command: |
-  #           .circleci/script/release
-  #     - save_cache:
-  #         paths:
-  #           - ~/.m2
-  #           - ~/graalvm-ce-java11-21.3.0
-  #         key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
-  #     - store_artifacts:
-  #         path: /tmp/release
-  #         destination: release
+  linux:
+    resource_class: large # localstack needs more mem
+    docker:
+      - image: circleci/clojure:openjdk-11-lein-2.9.6-bullseye
+      - image: localstack/localstack
+        environment:
+          SERVICES: s3
+    working_directory: ~/repo
+    environment:
+      LEIN_ROOT: "true"
+      GRAALVM_HOME: /home/circleci/graalvm-ce-java11-21.3.0
+      APP_PLATFORM: linux # used in release script
+      APP_TEST_ENV: native
+    steps:
+      - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+              rm -rf /home/circleci/.gitconfig
+      - restore_cache:
+          keys:
+            - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+      - run:
+          name: Install Clojure
+          command: |
+            wget https://download.clojure.org/install/linux-install-1.10.3.1020.sh
+            chmod +x linux-install-1.10.3.1020.sh
+            sudo ./linux-install-1.10.3.1020.sh
+      - run:
+          name: Install native dev tools
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install gcc g++ zlib1g-dev
+      - run:
+          name: Download GraalVM
+          command: |
+            cd ~
+            if ! [ -d graalvm-ce-java11-21.3.0 ]; then
+              curl -O -sL https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-amd64-21.3.0.tar.gz
+              tar xzf graalvm-ce-java11-linux-amd64-21.3.0.tar.gz
+            fi
+      - run:
+          name: Build binary
+          command: |
+            script/compile
+          no_output_timeout: 30m
+      - run:
+          name: Install bb for test
+          command: |
+            mkdir bb
+            bash <(curl -sL https://raw.githubusercontent.com/borkdude/babashka/master/install) \
+              --dir bb --download-dir bb
+      - run:
+          name: Run test
+          environment:
+            AWS_ACCESS_KEY_ID: test
+            AWS_SECRET_ACCESS_KEY: test
+            AWS_REGION: eu-west-1
+          command: PATH=$PATH:bb script/test
+      - run:
+          name: Release
+          command: |
+            .circleci/script/release
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/graalvm-ce-java11-21.3.0
+          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+      - store_artifacts:
+          path: /tmp/release
+          destination: release
   linux-aarch64:
     resource_class: large # localstack needs more mem
     docker:
@@ -343,9 +343,8 @@ workflows:
   ci:
     jobs:
       - jvm
-#      - linux
+      - linux
       - linux-static
-      - linux-aarch64
       - mac
       - deploy:
           filters:
@@ -353,5 +352,5 @@ workflows:
               only: master
           requires:
             - jvm
-            - linux-static
+            - linux
             - mac
