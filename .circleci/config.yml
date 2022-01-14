@@ -110,7 +110,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -184,7 +184,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -241,7 +241,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: linux-aarch64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -296,7 +296,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: mac-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: mac-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
