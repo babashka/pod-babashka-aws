@@ -28,9 +28,9 @@ jobs:
       - run:
           name: Install Clojure
           command: |
-            wget -nc https://download.clojure.org/install/linux-install-1.10.3.1020.sh
-            chmod +x linux-install-1.10.3.1020.sh
-            sudo ./linux-install-1.10.3.1020.sh
+            wget -nc https://download.clojure.org/install/linux-install-1.10.3.1058.sh
+            chmod +x linux-install-1.10.3.1058.sh
+            sudo ./linux-install-1.10.3.1058.sh
       - run:
           name: Run JVM tests
           environment:
@@ -68,9 +68,9 @@ jobs:
       - run:
           name: Install Clojure
           command: |
-            wget https://download.clojure.org/install/linux-install-1.10.3.1020.sh
-            chmod +x linux-install-1.10.3.1020.sh
-            sudo ./linux-install-1.10.3.1020.sh
+            wget https://download.clojure.org/install/linux-install-1.10.3.1058.sh
+            chmod +x linux-install-1.10.3.1058.sh
+            sudo ./linux-install-1.10.3.1058.sh
       - run:
           name: Install native dev tools
           command: |
@@ -110,7 +110,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -141,9 +141,9 @@ jobs:
       - run:
           name: Install Clojure
           command: |
-            wget https://download.clojure.org/install/linux-install-1.10.3.1020.sh
-            chmod +x linux-install-1.10.3.1020.sh
-            sudo ./linux-install-1.10.3.1020.sh
+            wget https://download.clojure.org/install/linux-install-1.10.3.1058.sh
+            chmod +x linux-install-1.10.3.1058.sh
+            sudo ./linux-install-1.10.3.1058.sh
       - run:
           name: Install native dev tools
           command: |
@@ -184,7 +184,64 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+      - store_artifacts:
+          path: /tmp/release
+          destination: release
+  linux-static-aarch64:
+    machine:
+      enabled: true
+      image: ubuntu-2004:202101-01
+    resource_class: arm.large
+    working_directory: ~/repo
+    environment:
+      LEIN_ROOT: "true"
+      GRAALVM_HOME: /home/circleci/graalvm-ce-java11-21.3.0
+      BABASHKA_STATIC: "true"
+      APP_PLATFORM: linux # used in release script
+      APP_ARCH: aarch64 # used in release script
+    steps:
+      - checkout
+      - run:
+          name: Get rid of erroneous git config
+          command: |
+            rm -rf /home/circleci/.gitconfig
+      - restore_cache:
+          keys:
+            - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+      - run:
+          name: Install Clojure
+          command: |
+            wget https://download.clojure.org/install/linux-install-1.10.3.1058.sh
+            chmod +x linux-install-1.10.3.1058.sh
+            sudo ./linux-install-1.10.3.1058.sh
+      - run:
+          name: Install native dev tools
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install g++
+      - run:
+          name: Download GraalVM
+          command: |
+            cd ~
+            if ! [ -d graalvm-ce-java11-21.3.0 ]; then
+              curl -O -sL https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.3.0/graalvm-ce-java11-linux-aarch64-21.3.0.tar.gz
+              tar xzf graalvm-ce-java11-linux-aarch64-21.3.0.tar.gz
+            fi
+      - run:
+          name: Build binary
+          command: |
+            script/compile
+          no_output_timeout: 30m
+      - run:
+          name: Release
+          command: |
+            .circleci/script/release
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/graalvm-ce-java11-21.3.0
+          key: linux-aarch64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -239,7 +296,7 @@ jobs:
           paths:
             - ~/.m2
             - ~/graalvm-ce-java11-21.3.0
-          key: mac-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+          key: mac-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - store_artifacts:
           path: /tmp/release
           destination: release
@@ -273,6 +330,7 @@ workflows:
       - jvm
       - linux
       - linux-static
+      - linux-static-aarch64
       - mac
       - deploy:
           filters:
