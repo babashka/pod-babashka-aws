@@ -198,7 +198,6 @@ jobs:
       LEIN_ROOT: "true"
       GRAALVM_HOME: /home/circleci/graalvm-ce-java11-21.3.0
       BABASHKA_STATIC: "true"
-      BABASHKA_MUSL: "true"
       APP_PLATFORM: linux # used in release script
       APP_ARCH: aarch64 # used in release script
     steps:
