@@ -220,7 +220,6 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get -y install g++
-            sudo -E script/setup-musl
       - run:
           name: Download GraalVM
           command: |
