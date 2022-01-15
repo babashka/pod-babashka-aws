@@ -2,8 +2,8 @@
 
 ## v0.1.1
 
-- chore: update deps (see `deps.edn`)
-- feat [#46](https://github.com/babashka/pod-babashka-aws/issues/46): Provide aarch64 binary ([@cap10morgan](https://github.com/cap10morgan))
+- New: [#46](https://github.com/babashka/pod-babashka-aws/issues/46): Provide aarch64 binary ([@cap10morgan](https://github.com/cap10morgan))
+- Update deps (see `deps.edn`)
 
 ## v0.1.0
 
