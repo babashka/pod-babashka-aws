@@ -26,7 +26,13 @@
       max-column-size (->> deps-lines
                            (map (fn [[k v n]]
                                   (-> k str count)))
-                           (apply max))]
+                           (apply max))
+      available-services (->> latest-releases
+                              (map (comp keyword name key))
+                              (sort)
+                              (vec))]
+  (spit "resources/aws-services.edn" (with-out-str (clojure.pprint/pprint available-services)))
+
   (as-> edn-template  $
     (str/replace $ "{{latest-releases.edn}}"
                  (->> (for [[api ver svc-name] (sort-by first deps-lines)
