@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.2
+
+- fix [#49](https://github.com/babashka/pod-babashka-aws/issues/49): creation of available services ([@jeroenvandijk](https://github.com/jeroenvandijk))
+
 ## v0.1.1
 
 - feat [#46](https://github.com/babashka/pod-babashka-aws/issues/46): Provide aarch64 binary ([@cap10morgan](https://github.com/cap10morgan))
