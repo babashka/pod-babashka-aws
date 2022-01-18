@@ -1,12 +1,15 @@
 [:AWS242AppRegistry
+ :AWSApplicationCostProfiler
  :AWSMigrationHub
  :accessanalyzer
+ :account
  :acm
  :acm-pca
  :alexaforbusiness
  :amp
  :amplify
  :amplifybackend
+ :api
  :apigateway
  :apigatewaymanagementapi
  :apigatewayv2
@@ -16,6 +19,7 @@
  :application-autoscaling
  :application-insights
  :appmesh
+ :apprunner
  :appstream
  :appsync
  :athena
@@ -28,7 +32,11 @@
  :budgets
  :ce
  :chime
+ :chime-sdk-identity
+ :chime-sdk-meetings
+ :chime-sdk-messaging
  :cloud9
+ :cloudcontrol
  :clouddirectory
  :cloudformation
  :cloudfront
@@ -92,11 +100,14 @@
  :elastictranscoder
  :email
  :emr-containers
+ :endpoints
  :entitlement-marketplace
  :es
  :eventbridge
  :events
+ :finspace
  :firehose
+ :fis
  :fms
  :forecast
  :forecastquery
@@ -106,6 +117,7 @@
  :glacier
  :globalaccelerator
  :glue
+ :grafana
  :greengrass
  :greengrassv2
  :groundstation
@@ -133,6 +145,7 @@
  :iotwireless
  :ivs
  :kafka
+ :kafkaconnect
  :kendra
  :kinesis
  :kinesis-video-archived-media
@@ -149,6 +162,8 @@
  :lightsail
  :location
  :logs
+ :lookoutequipment
+ :lookoutmetrics
  :lookoutvision
  :machinelearning
  :macie
@@ -164,10 +179,13 @@
  :mediastore
  :mediastore-data
  :mediatailor
+ :memorydb
  :meteringmarketplace
+ :mgn
  :migrationhub-config
  :mobile
  :mobileanalytics
+ :models-lex-v2
  :monitoring
  :mq
  :mturk-requester
@@ -175,10 +193,13 @@
  :neptune
  :network-firewall
  :networkmanager
+ :nimble
+ :opensearch
  :opsworks
  :opsworkscm
  :organizations
  :outposts
+ :panorama
  :personalize
  :personalize-events
  :personalize-runtime
@@ -188,6 +209,7 @@
  :pinpoint-sms-voice
  :polly
  :pricing
+ :proton
  :qldb
  :qldb-session
  :quicksight
@@ -197,13 +219,18 @@
  :redshift
  :redshift-data
  :rekognition
+ :resiliencehub
  :resource-groups
  :resourcegroupstaggingapi
  :robomaker
  :route53
+ :route53-recovery-cluster
+ :route53-recovery-control-config
+ :route53-recovery-readiness
  :route53domains
  :route53resolver
  :runtime-lex
+ :runtime-lex-v2
  :runtime-sagemaker
  :s3
  :s3control
@@ -225,10 +252,13 @@
  :shield
  :signer
  :sms
+ :snow-device-management
  :snowball
  :sns
  :sqs
  :ssm
+ :ssm-contacts
+ :ssm-incidents
  :sso
  :sso-admin
  :sso-oidc
@@ -245,10 +275,12 @@
  :transcribe
  :transfer
  :translate
+ :voice-id
  :waf
  :waf-regional
  :wafv2
  :wellarchitected
+ :wisdom
  :workdocs
  :worklink
  :workmail
