@@ -64,7 +64,7 @@ jobs:
               rm -rf /home/circleci/.gitconfig
       - restore_cache:
           keys:
-            - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+            - linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Clojure
           command: |
@@ -137,7 +137,7 @@ jobs:
               rm -rf /home/circleci/.gitconfig
       - restore_cache:
           keys:
-            - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+            - linux-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Clojure
           command: |
@@ -208,7 +208,7 @@ jobs:
             rm -rf /home/circleci/.gitconfig
       - restore_cache:
           keys:
-            - linux-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+            - linux-aarch64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Clojure
           command: |
@@ -260,7 +260,7 @@ jobs:
               rm -rf ~/.gitconfig
       - restore_cache:
           keys:
-            - mac-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
+            - mac-amd64-{{ checksum "deps.edn" }}-{{ checksum ".circleci/config.yml" }}
       - run:
           name: Install Clojure
           command: |
