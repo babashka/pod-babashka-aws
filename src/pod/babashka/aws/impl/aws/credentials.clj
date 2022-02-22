@@ -192,6 +192,7 @@
 (def lookup-map
   {'fetch -fetch
    '-basic-credentials-provider -basic-credentials-provider
+   '-environment-credentials-provider -environment-credentials-provider
    '-system-property-credentials-provider -system-property-credentials-provider
    '-profile-credentials-provider -profile-credentials-provider
    '-credential-process-credentials-provider -credential-process-credentials-provider
@@ -232,7 +233,12 @@
             :code (pr-str
                    '(defn basic-credentials-provider [conf]
                       (-basic-credentials-provider conf)))}
-
+           
+           {:name "environment-credentials-provider"
+            :code (pr-str
+                   '(defn environment-credentials-provider []
+                      (-environment-credentials-provider)))}
+           
            {:name "system-property-credentials-provider"
             :code (pr-str
                    '(defn system-property-credentials-provider []
