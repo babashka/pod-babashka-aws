@@ -19,7 +19,8 @@ Available namespaces and functions:
 - `pod.babashka.aws.config`: `parse`
 - `pod.babashka.aws.credentials`: `credential-process-credentials-provider`,
   `basic-credentials-provider`, `default-credentials-provider`,
-  `fetch`, `profile-credentials-provider`, `system-property-credentials-provider`
+  `fetch`, `profile-credentials-provider`, `system-property-credentials-provider`,
+  `environment-credentials-provider`,
 - `pod.babashka.aws.logging`: `set-level!`
 
 ## Example

@@ -1,8 +1,9 @@
 (ns credentials-test
   (:require
    [babashka.pods :as pods]
+   [cognitect.aws.util :as u]
    [clojure.java.io :as io]
-   [clojure.test :as t :refer [deftest is]]))
+   [clojure.test :as t :refer [deftest testing is]]))
 
 (defmethod clojure.test/report :begin-test-var [m]
   (println "===" (-> m :var meta :name))
@@ -26,6 +27,15 @@
        ~@body
        (finally
          (System/setProperties props#)))))
+
+(defn stub-getenv [env]
+  (fn
+    ([] env)
+    ([k] (get env k))))
+
+(defmacro with-env [env & body]
+  (with-redefs [u/getenv (stub-getenv ~env)]
+    ~@body))
 
 (defn create-temp-dir [prefix]
   (str (java.nio.file.Files/createTempDirectory
@@ -107,7 +117,39 @@ credential_process = echo '{\"AccessKeyId\":\"creds+-custom-prop-key\",\"SecretA
                    :secret-access-key "creds+-custom-prop-secret"
                    :session-token session-token
                    ;; Test runs within a second, so with flooring and the cutoff of 300, the ttl is 299
-                   :cognitect.aws.credentials/ttl 299})))))
+                   :cognitect.aws.credentials/ttl 299}))))
+
+  (testing "environment credentials provider"
+    (with-env {"AWS_ACCESS_KEY_ID" "foo"
+               "AWS_SECRET_ACCESS_KEY" "bar"
+               "AWS_SESSION_TOKEN" "baz"}
+      (is (=
+           {:aws/access-key-id "foo"
+            :aws/secret-access-key "bar"
+            :aws/session-id "baz"}
+           (creds/fetch (creds/environment-creds-provider)))
+          "required vars present"))
+    (with-env {"AWS_ACCESS_KEY_ID" "foo"
+               "AWS_SECRET_ACCESS_KEY" "bar"
+               "AWS_SESSION_TOKEN" "baz"}
+      (is (=
+           {:aws/access-key-id "foo"
+            :aws/secret-access-key "bar"
+            :aws/session-id "baz"}
+           (creds/fetch (creds/environment-creds-provider)))
+          "required and optional vars present"))
+    (testing "required vars blank"
+      (doall
+       (for [env [{}
+                  {"AWS_ACCESS_KEY_ID" "foo"}
+                  {"AWS_SECRET_ACCESS_KEY" "bar"}
+                  {"AWS_ACCESS_KEY_ID" ""
+                   "AWS_SECRET_ACCESS_KEY" "bar"}
+                  {"AWS_ACCESS_KEY_ID" "foo"
+                   "AWS_SECRET_ACCESS_KEY" ""}]]
+         (with-env env
+           (let [p (creds/environment-creds-provider)]
+             (is (nil? (creds/fetch p))))))))))
 
 (require '[pod.babashka.aws.config :as config])
 
