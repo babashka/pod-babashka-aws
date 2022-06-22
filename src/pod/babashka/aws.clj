@@ -146,7 +146,10 @@
                          (require '[pod.babashka.aws.credentials :as credentials])
                          (defn client [{:keys [credentials-provider] :as config}]
                            (let [credentials-provider (or credentials-provider
-                                                          (credentials/default-credentials-provider))]
+                                                          (credentials/default-credentials-provider))
+                                 credentials-provider (if (satisfies? credentials/CredentialsProvider credentials-provider)
+                                                        (credentials/-identity-credentials-provider (credentials/fetch credentials-provider))
+                                                        credentials-provider)]
                              (-client (assoc config :credentials-provider credentials-provider))))))}
                     {:name "doc"
                      :code (pr-str '(defn doc [client op]

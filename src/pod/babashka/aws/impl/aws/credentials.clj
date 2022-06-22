@@ -183,6 +183,12 @@
   (fetch [m]
     (creds/fetch (get-provider m))))
 
+(defn -identity-credentials-provider [conf]
+  (create-provider
+    (reify creds/CredentialsProvider
+      (fetch [_]
+        conf))))
+
 ;;; Pod Client
 
 (defn -fetch [provider]
@@ -190,12 +196,13 @@
     (creds/fetch provider)))
 
 (def lookup-map
-  {'fetch -fetch
+  {'-fetch -fetch
    '-basic-credentials-provider -basic-credentials-provider
    '-system-property-credentials-provider -system-property-credentials-provider
    '-profile-credentials-provider -profile-credentials-provider
    '-credential-process-credentials-provider -credential-process-credentials-provider
-   '-default-credentials-provider -default-credentials-provider})
+   '-default-credentials-provider -default-credentials-provider
+   '-identity-credentials-provider -identity-credentials-provider})
 
 (require 'cognitect.aws.ec2-metadata-utils)
 
@@ -241,4 +248,13 @@
            {:name "default-credentials-provider"
             :code (pr-str
                    '(defn default-credentials-provider [& _]
-                      (-default-credentials-provider (-jvm-properties))))})})
+                      (-default-credentials-provider (-jvm-properties))))}
+           {:name "CredentialsProvider"
+            :code (pr-str               
+                   '(do 
+                      (defprotocol CredentialsProvider
+                        (fetch [_]))
+                      (extend-type clojure.lang.PersistentArrayMap
+                        CredentialsProvider
+                        (fetch [m]
+                          (-fetch m)))))})})
