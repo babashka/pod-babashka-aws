@@ -72,7 +72,8 @@ Your code:
 
 ```clojure
 (ns my.code
-  (:require [pod.babashka.aws :as aws])) ; required just like a normal Clojure library
+  (:require [pod.babashka.aws :as aws] ; required just like a normal Clojure library
+            [clojure.java.io :as io]))
   
 (def region "eu-central-1")
 
@@ -87,8 +88,6 @@ Your code:
             {:op :CreateBucket
              :request {:Bucket "pod-babashka-aws"
                        :CreateBucketConfiguration {:LocationConstraint region}}})
-
-(require '[clojure.java.io :as io])
 
 (aws/invoke s3-client
             {:op :PutObject
