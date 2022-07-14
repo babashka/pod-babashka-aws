@@ -22,7 +22,9 @@ Available namespaces and functions:
   `fetch`, `profile-credentials-provider`, `system-property-credentials-provider`
 - `pod.babashka.aws.logging`: `set-level!`
 
-## Example
+## Examples
+
+### Single-file script
 
 ``` clojure
 #!/usr/bin/env bb
@@ -57,6 +59,42 @@ Available namespaces and functions:
 ```
 
 See [test/script.clj](test/script.clj) for an example script.
+
+### Project with a bb.edn file
+
+`bb.edn`:
+
+```clojure
+{:pods {org.babashka/aws {:version "0.1.2"}}} ; this will be loaded on demand
+```
+
+Your code:
+
+```clojure
+(ns my.code
+  (:require [pod.babashka.aws :as aws] ; required just like a normal Clojure library
+            [clojure.java.io :as io]))
+  
+(def region "eu-central-1")
+
+(def s3-client
+  (aws/client {:api :s3 :region region}))
+
+(aws/doc s3-client :ListBuckets)
+
+(aws/invoke s3-client {:op :ListBuckets})
+
+(aws/invoke s3-client
+            {:op :CreateBucket
+             :request {:Bucket "pod-babashka-aws"
+                       :CreateBucketConfiguration {:LocationConstraint region}}})
+
+(aws/invoke s3-client
+            {:op :PutObject
+             :request {:Bucket "pod-babashka-aws"
+                       :Key "logo.png"
+                       :Body (io/file "resources" "babashka.png")}})
+```
 
 ## Differences with aws-api
 
