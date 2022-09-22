@@ -158,7 +158,7 @@ implementation. Use `pod.babashka.aws.logging/set-level!` to change the level of
 logging in the pod. The default log level in the pod is `:warn`. All possible
 levels: `:trace`, `:debug`, `:info`, `:warn`, `:error` or `:fatal`.
 
-Each aws-api client has it's own logger which adopts the logging level
+Each aws-api client has its own logger which adopts the logging level
 of the global logger at time it was instantiated.
 
 ```clojure
