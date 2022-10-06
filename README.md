@@ -1,6 +1,6 @@
 > # pod-babashka-aws <sup>* *deprecated*</sup>
 >
-> **Great news! :tada:** [Awyeah-api](https://github.com/grzm/awyeah-api) is a babashka compatible re-implementation of Cognitect's AWS API!
+> **Great news! :tada:** [Awyeah-api](https://github.com/grzm/awyeah-api) is a babashka compatible re-implementation of Cognitect's [aws-api](https://github.com/cognitect-labs/aws-api)!
 This means that this pod is no longer necessary, and will no longer be maintained.
 Please use [Awyeah-api](https://github.com/grzm/awyeah-api).
 
