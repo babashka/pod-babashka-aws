@@ -8,18 +8,6 @@ A [babashka](https://github.com/babashka/babashka)
 [pod](https://github.com/babashka/pods) wrapping the
 [aws-api](https://github.com/cognitect-labs/aws-api) library.
 
-
-> # pod-babashka-etaoin <sup>* *deprecated*</sup>
->
-> **Great news! :tada:** [Etaoin](https://github.com/clj-commons/etaoin) is now babashka compatible!
-This means that this pod is no longer necessary, and will no longer be maintained.
-Please use [Etaoin](https://github.com/clj-commons/etaoin) instead.
-
-[Babashka](https://github.com/borkdude/babashka)
-[pod](https://github.com/babashka/babashka.pods) wrapping
-[Etaoin](https://github.com/igrishaev/etaoin), a pure Clojure webdriver protocol
-implementation.
-
 ## Status
 
 Experimental, awaiting your feedback.
